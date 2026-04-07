@@ -1,0 +1,106 @@
+{
+  "menu": {
+    "title": "MYSTIC SHOT",
+    "subtitle": "Turn-based Artillery / Math Puzzle",
+    "player1": "Player 1",
+    "player2": "Player 2",
+    "playerNamePlaceholder": "Enter name",
+    "versus": "VS",
+    "difficulty": "Difficulty",
+    "startGame": "START GAME",
+    "showGuide": "How to Play",
+    "hideGuide": "Hide Guide"
+  },
+  "color": {
+    "cyan": "Cyan",
+    "pink": "Pink",
+    "green": "Green",
+    "orange": "Orange",
+    "purple": "Purple",
+    "yellow": "Yellow"
+  },
+  "hud": {
+    "yourTurn": "YOUR TURN",
+    "hp": "{{hp}} HP",
+    "timer": "{{seconds}}s"
+  },
+  "footer": {
+    "playerTurn": "{{name}}'s Turn",
+    "movesLeft": "Moves left: {{count}}"
+  },
+  "button": {
+    "move": "Move",
+    "fire": "Fire",
+    "dirLeftTitle": "Direction: left (-x)",
+    "dirRightTitle": "Direction: right (+x)",
+    "backToMenu": "BACK TO MENU"
+  },
+  "game": {
+    "wins": "{{name}} Wins!"
+  },
+  "formula": {
+    "label": "f(x) =",
+    "placeholder": "e.g. x^2 + 2*x - 1"
+  },
+  "validation": {
+    "parseError": "Cannot parse expression."
+  },
+  "theme": {
+    "toggleTitle": "Switch to {{mode}} mode",
+    "toggleAriaLabel": "Toggle theme",
+    "light": "light",
+    "dark": "dark"
+  },
+  "guide": {
+    "objective": {
+      "heading": "Objective",
+      "description": "Reduce your opponent's HP to 0 by firing projectiles that follow mathematical curves."
+    },
+    "howItWorks": {
+      "heading": "How It Works",
+      "step1": "Each turn you enter a math function <code>f(x)</code>",
+      "step2": "The projectile flies along the graph of your function",
+      "step3": "Your position is the origin — the curve is relative to you"
+    },
+    "actions": {
+      "heading": "Actions",
+      "fireLabel": "Fire",
+      "fireDesc": "Shoots a projectile along f(x) toward the opponent",
+      "moveLabel": "Move",
+      "moveDesc": "Move along f(x) up to 5 units of arc length (choose <chevronLeft/> / <chevronRight/> direction)"
+    },
+    "powerUps": {
+      "heading": "Power-Ups",
+      "doubleDamage": "Double Damage",
+      "knockback": "Knockback",
+      "extraMove": "Extra Move",
+      "shield": "Shield (blocks next damage)",
+      "piercing": "Piercing (breaks soft obstacles)"
+    },
+    "obstacles": {
+      "heading": "Obstacles",
+      "hard": "<b>Hard</b> (solid) — blocks projectiles",
+      "soft": "<b>Soft</b> (dashed) — destroyed on hit, stops projectile"
+    },
+    "difficulty": {
+      "heading": "Difficulty",
+      "easy": "<b>Easy</b> — polynomials only (<code>x^2</code>, <code>2*x+1</code>)",
+      "medium": "<b>Medium</b> — + trig / log / sqrt (<code>sin(x)</code>, <code>sqrt(x)</code>)",
+      "hard": "<b>Hard</b> — must use at least one special function"
+    }
+  },
+  "tooltip": {
+    "player": "{{name}}\n{{hp}} HP",
+    "powerUp": {
+      "double_damage": "Double Damage\nx2 damage next shot",
+      "knockback": "Knockback\nPushes enemy back 2 units",
+      "extra_move": "Extra Move\n+1 move charge",
+      "shield": "Shield\nBlocks next damage completely",
+      "piercing": "Piercing\nBreaks soft obstacles"
+    },
+    "obstacle": {
+      "hard": "Hard Obstacle\nBlocks all projectiles",
+      "soft": "Soft Obstacle\nDestroyed on hit"
+    }
+  }
+}

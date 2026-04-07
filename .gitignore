@@ -1,0 +1,6 @@
+# build output
+node_modules/
+dist/
+
+# AI generated files
+reports/

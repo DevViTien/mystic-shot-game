@@ -1,0 +1,106 @@
+{
+  "menu": {
+    "title": "MYSTIC SHOT",
+    "subtitle": "Pháo binh theo lượt / Giải đố Toán học",
+    "player1": "Người chơi 1",
+    "player2": "Người chơi 2",
+    "playerNamePlaceholder": "Nhập tên",
+    "versus": "VS",
+    "difficulty": "Độ khó",
+    "startGame": "BẮT ĐẦU",
+    "showGuide": "Hướng dẫn",
+    "hideGuide": "Ẩn hướng dẫn"
+  },
+  "color": {
+    "cyan": "Lam",
+    "pink": "Hồng",
+    "green": "Lục",
+    "orange": "Cam",
+    "purple": "Tím",
+    "yellow": "Vàng"
+  },
+  "hud": {
+    "yourTurn": "LƯỢT CỦA BẠN",
+    "hp": "{{hp}} HP",
+    "timer": "{{seconds}}s"
+  },
+  "footer": {
+    "playerTurn": "Lượt của {{name}}",
+    "movesLeft": "Lượt di chuyển: {{count}}"
+  },
+  "button": {
+    "move": "Di chuyển",
+    "fire": "Bắn",
+    "dirLeftTitle": "Hướng: trái (-x)",
+    "dirRightTitle": "Hướng: phải (+x)",
+    "backToMenu": "VỀ MENU"
+  },
+  "game": {
+    "wins": "{{name}} Chiến thắng!"
+  },
+  "formula": {
+    "label": "f(x) =",
+    "placeholder": "vd: x^2 + 2*x - 1"
+  },
+  "validation": {
+    "parseError": "Không thể phân tích biểu thức."
+  },
+  "theme": {
+    "toggleTitle": "Chuyển sang chế độ {{mode}}",
+    "toggleAriaLabel": "Chuyển giao diện",
+    "light": "sáng",
+    "dark": "tối"
+  },
+  "guide": {
+    "objective": {
+      "heading": "Mục tiêu",
+      "description": "Giảm HP đối thủ về 0 bằng cách bắn đạn bay theo đường cong hàm số toán học."
+    },
+    "howItWorks": {
+      "heading": "Cách chơi",
+      "step1": "Mỗi lượt bạn nhập một hàm toán học <code>f(x)</code>",
+      "step2": "Đạn sẽ bay theo đồ thị hàm số của bạn",
+      "step3": "Vị trí của bạn là gốc tọa độ — đường cong tính tương đối từ vị trí bạn"
+    },
+    "actions": {
+      "heading": "Hành động",
+      "fireLabel": "Bắn",
+      "fireDesc": "Bắn đạn theo f(x) về phía đối thủ",
+      "moveLabel": "Di chuyển",
+      "moveDesc": "Di chuyển theo f(x) tối đa 5 đơn vị độ dài cung (chọn hướng <chevronLeft/> / <chevronRight/>)"
+    },
+    "powerUps": {
+      "heading": "Vật phẩm tăng sức mạnh",
+      "doubleDamage": "Sát thương x2",
+      "knockback": "Đẩy lùi",
+      "extraMove": "Thêm lượt di chuyển",
+      "shield": "Khiên (chặn hoàn toàn 1 lần sát thương)",
+      "piercing": "Xuyên phá (phá vật cản mềm)"
+    },
+    "obstacles": {
+      "heading": "Vật cản",
+      "hard": "<b>Cứng</b> (tô đặc) — chặn đạn",
+      "soft": "<b>Mềm</b> (nét đứt) — bị phá hủy khi trúng, dừng đạn"
+    },
+    "difficulty": {
+      "heading": "Độ khó",
+      "easy": "<b>Dễ</b> — chỉ đa thức (<code>x^2</code>, <code>2*x+1</code>)",
+      "medium": "<b>Trung bình</b> — + lượng giác / log / sqrt (<code>sin(x)</code>, <code>sqrt(x)</code>)",
+      "hard": "<b>Khó</b> — bắt buộc có ít nhất 1 hàm đặc biệt"
+    }
+  },
+  "tooltip": {
+    "player": "{{name}}\n{{hp}} HP",
+    "powerUp": {
+      "double_damage": "Sát Thương Đôi\nx2 sát thương lượt tiếp",
+      "knockback": "Đẩy Lùi\nĐẩy đối thủ lùi 2 đơn vị",
+      "extra_move": "Di Chuyển Thêm\n+1 lượt di chuyển",
+      "shield": "Lá Chắn\nChặn hoàn toàn 1 lần sát thương",
+      "piercing": "Xuyên Phá\nPhá vật cản mềm"
+    },
+    "obstacle": {
+      "hard": "Vật Cản Cứng\nChặn mọi đạn",
+      "soft": "Vật Cản Mềm\nBị phá khi trúng đạn"
+    }
+  }
+}

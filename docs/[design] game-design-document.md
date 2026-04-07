@@ -25,7 +25,7 @@ Bắt đầu trận → Chọn difficulty → Random map
 │     → Di chuyển đến khi chạm biên map              │
 │                                                    │
 │  2. Tấn công                                       │
-│     → Nhập hàm số → Đạn bay theo đồ thị (+x)      │
+│     → Chọn hướng ◀/▶ + Nhập hàm số → Đạn bay theo đồ thị │
 │     → Kiểm tra va chạm:                           │
 │        • Vật cản cứng → đạn dừng                  │
 │        • Vật cản mềm → đạn dừng + xoá vật cản    │
@@ -54,35 +54,60 @@ Bắt đầu trận → Chọn difficulty → Random map
 
 | Thuộc tính | Giá trị |
 |------------|---------|
-| Input | Hàm số dạng text, ví dụ `y = -0.5*x^2 + 3*x + 1` |
+| Input | Hàm số dạng text, ví dụ `y = -0.5*x^2 + 3*x` (tối đa **100 ký tự**) |
 | Validation | Parse bằng **math.js**, kiểm tra hợp lệ theo difficulty |
 | Quỹ đạo đạn | Đồ thị hàm số, vẽ animation từ vị trí player |
-| Hướng bắn | Đạn luôn bay theo chiều **+x** (trái → phải). Muốn bắn ngược thì nhập hàm có hệ số âm phù hợp |
+| Hướng bắn | Player **tự chọn hướng** bắn: +x (phải) hoặc -x (trái) thông qua UI direction picker (◀/▶) |
 | Hitbox | Hình tròn bán kính **0.5** quanh mỗi player |
 | Damage | Mặc định: **25 HP** (có thể thay đổi bởi power-up) |
 
-**Cơ chế bắn:**
-- Hàm số do player nhập được **dịch chuyển** (translate) sao cho gốc tọa độ hàm số = vị trí player hiện tại
-- Ví dụ: Player ở (3, 2), nhập `y = x^2` → thực tế tính `y = (x-3)^2 + 2`
-- Đạn chạy theo chiều +x cho đến khi ra khỏi biên map hoặc chạm vật cản
+**Cơ chế dịch hàm số (Translate + Normalize):**
+- Hàm số luôn được **normalize** để đi qua vị trí player: `translated(x) = f(x - ox) - f(0) + oy`
+- Tại vị trí player (`x = ox`): `f(0) - f(0) + oy = oy` → **luôn xuất phát từ player** ✅
+- Ví dụ: Player ở (3, 2), nhập `y = x^2` → `y = (x-3)² - 0 + 2 = (x-3)² + 2`
+- Ví dụ: Player ở (3, 2), nhập `y = cos(x)` → `y = cos(x-3) - cos(0) + 2 = cos(x-3) - 1 + 2`
+- **Hằng số tự do bị vô hiệu hóa**: `f(x) = 5` → `5 - 5 + oy = oy` → đường ngang qua player (không thể exploit)
+
+**Hướng bắn — Player tự chọn:**
+- Player chọn hướng bắn qua UI direction picker (◀ trái / ▶ phải), giống cơ chế Move
+- Hướng mặc định: **về phía đối thủ** (auto-suggest)
+- Bắn ngược (xa đối thủ) = chiến thuật hợp lệ: nhặt power-up phía sau, phá vật cản, hoặc tấn công đối thủ đã di chuyển ra sau lưng
+- Đạn run theo hướng đã chọn cho đến khi ra khỏi biên map hoặc chạm vật cản/player
 
 **Cơ chế collision detection:**
 - Đạn được sample theo từng bước `Δx` nhỏ (ví dụ 0.05)
 - Tại mỗi điểm `(x, f(x))`, kiểm tra khoảng cách tới:
-  - Player đối thủ → `distance ≤ 0.5` → HIT → gây damage
-  - Vật cản cứng → đạn dừng
-  - Vật cản mềm → đạn dừng + xoá vật cản
   - Power-up → nhặt (áp dụng lượt sau) + đạn tiếp tục bay
+  - Vật cản mềm → đạn dừng + xoá vật cản (trừ khi có Piercing)
+  - Vật cản cứng → đạn dừng
+  - Player đối thủ → `distance ≤ 0.5` → HIT → gây damage
 
 ### 3.3 Movement (Di chuyển)
 
-- Nhập hàm số giống shooting
-- Hàm số được translate từ vị trí hiện tại của player
-- Player **di chuyển dọc theo đồ thị** cho đến khi **chạm biên map**
-- Vị trí cuối cùng = điểm cuối trên đồ thị trước khi ra khỏi map
+- Nhập hàm số giống shooting, hàm số được **translate + normalize** từ vị trí hiện tại (cùng công thức: `f(x-ox) - f(0) + oy`)
+- Player **chọn hướng di chuyển**: +x (phải) hoặc -x (trái) — tự do, không phụ thuộc vị trí đối thủ
+- Player **di chuyển dọc theo đồ thị**, giới hạn bởi **arc length = 5 đơn vị**
+- Vị trí cuối cùng = điểm trên đồ thị tại đó tổng quãng đường đạt 5 đơn vị
+- Nếu đồ thị ra ngoài biên map trước khi đủ 5 → dừng tại điểm biên hợp lệ cuối cùng
 - Mỗi turn: tối đa **1 lần di chuyển** (nếu còn lượt), thực hiện **trước khi bắn**
 - Lượt di chuyển ban đầu: **2**
 - Có thể tăng bằng power-up (Extra Move)
+
+**Cơ chế arc length:**
+- Arc length (độ dài đường cong) = tổng khoảng cách Euclid giữa các điểm sample trên đồ thị
+- Tính bằng công thức gần đúng: `L ≈ Σ √(Δx² + Δy²)` với Δx = 0.05
+- Hàm thẳng (`f(x) = 0`) → đi được 5 đơn vị theo x
+- Hàm cong (`f(x) = x²`) → đi được ít hơn 5 đơn vị x (vì đường cong dài hơn)
+- **Chiến thuật**: Chọn hàm đơn giản → đi xa hơn. Chọn hàm phức tạp → đi ngắn nhưng di chuyển phức tạp (né vật cản)
+
+```
+Ví dụ: Player ở (0, 0), di chuyển theo f(x) = 0 (đường thẳng), hướng +x
+→ Arc length = 5 → dừng tại (5, 0)
+
+Ví dụ: Player ở (0, 0), di chuyển theo f(x) = sin(x), hướng +x
+→ Đường cong dài hơn đường thẳng → dừng tại khoảng (3.8, sin(3.8))
+   vì arc length sin(x) > x trên cùng khoảng
+```
 
 ### 3.4 Difficulty Levels (Giới hạn hàm số)
 
@@ -129,6 +154,12 @@ Hiệu ứng áp dụng **từ lượt tiếp theo**.
 | Hitbox radius | **0.5** |
 | Move charges | **2** (ban đầu) |
 | Buffs | Không |
+| Color | Chọn từ menu (6 màu: Cyan, Pink, Green, Orange, Purple, Yellow) |
+
+- Mỗi player chọn **1 màu riêng** — 2 player không được trùng màu
+- Màu mặc định: P1 = Cyan (`#00ccff`), P2 = Pink (`#ff4466`)
+- Màu được dùng cho: hình tròn player, quỹ đạo đạn, HP bar, nhãn tên trên HUD
+- Sau này có thể mở rộng thành chọn hình nhân vật (avatar/skin)
 
 ---
 
@@ -157,17 +188,92 @@ Hiệu ứng áp dụng **từ lượt tiếp theo**.
 └─────────────────────────────────────────────────────────────┘
 ```
 
+### Menu Screen Layout
+
+```
+┌─────────────────────────────────────────────────────┐
+│                                                     │
+│               M Y S T I C   S H O T                 │
+│          Turn-based Artillery / Math Puzzle          │
+│                                                     │
+│  ┌──────────────┐          ┌──────────────┐         │
+│  │   Player 1   │   VS     │   Player 2   │         │
+│  │ [___name___] │          │ [___name___] │         │
+│  │ ● ● ● ● ● ● │          │ ● ● ● ● ● ● │         │
+│  │ (6 colors)   │          │ (6 colors)   │         │
+│  └──────────────┘          └──────────────┘         │
+│                                                     │
+│            Difficulty: [Easy] [Medium] [Hard]        │
+│                                                     │
+│                  [ START GAME ]                      │
+│                                                     │
+│                  How to Play ▼                       │
+│  ┌─────────────────────────────────────────────┐    │
+│  │ 🎯 Objective: Giảm HP đối thủ về 0         │    │
+│  │ 📐 How It Works: Nhập f(x), đạn bay theo   │    │
+│  │ 🕹️ Actions: Fire (bắn) / Move (di chuyển)  │    │
+│  │ ⚡ Power-Ups: x2, <<, +1, SH, !!           │    │
+│  │ 🧱 Obstacles: Hard (chặn) / Soft (phá)     │    │
+│  │ 📊 Difficulty: Easy / Medium / Hard rules   │    │
+│  └─────────────────────────────────────────────┘    │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+### Game Over Overlay
+
+```
+┌─────────────────────────────────────────┐
+│                                         │
+│         [Tên người thắng] Wins!         │
+│                                         │
+│           [ BACK TO MENU ]              │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+- Overlay React hiển thị trên canvas khi game kết thúc
+- Nút BACK TO MENU → reset state, chuyển về MenuScreen
+
+### Gameplay UI Layout
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  P1: ■ 100HP [buffs]         ⏱ 45s         P2: ■ 100HP [buffs]  │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│                         Y                                    │
+│                         │                                    │
+│                   ●P1   │        ◆pw    ██ob(hard)           │
+│                         │                 ●P2                │
+│   ──────────────────────┼─────────────────────── X           │
+│                         │     ┊┊ob(soft)                     │
+│                         │                                    │
+│                                                              │
+├─────────────────────────────────────────────────────────────┤
+│  🎯 Player 1's Turn                    Moves left: 2        │
+│  ┌──────────────────────────────────┐                       │
+│  │ f(x) = ________________________ │   [◀][Move][▶] [Fire] │
+│  └──────────────────────────────────┘                       │
+│  Formula: (KaTeX render công thức đẹp)                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ### UI Components
 
 | Component | Mô tả |
 |-----------|-------|
+| **Menu Screen** | React overlay: nhập tên, chọn màu (6 options, không trùng), chọn difficulty, nút Start, hướng dẫn game collapsible |
+| **How to Play Guide** | Panel mở/đóng trong menu: giải thích objective, cách chơi, actions, power-ups, obstacles, difficulty rules |
+| **Game Over Overlay** | React overlay: hiển thị tên người thắng + nút BACK TO MENU |
 | **HP Bar** | Thanh HP ngang, giảm dần, đổi màu (xanh → vàng → đỏ) |
 | **Timer** | Countdown 60s, đổi màu đỏ khi < 10s |
+| **Turn Indicator** | Glow border quanh player đang active + badge "YOUR TURN" |
 | **Buff icons** | Hiển thị power-up đang active bên cạnh HP |
-| **Input field** | Text input cho hàm số, validate real-time |
-| **Preview** | Vẽ đồ thị mờ (dashed line) trên map trước khi bấm Fire/Move |
+| **Input field** | Text input cho hàm số, validate real-time, KaTeX preview |
+| **Direction picker** | Nút ◀ / ▶ chọn hướng di chuyển (dùng cho Move) |
 | **Move counter** | Số lượt di chuyển còn lại |
-| **Action buttons** | [Move] và [Fire], disable khi không khả dụng |
+| **Action buttons** | [Move] và [Fire], disable khi formula invalid hoặc không khả dụng |
 
 ---
 
@@ -182,6 +288,10 @@ Hiệu ứng áp dụng **từ lượt tiếp theo**.
 | **Language** | **TypeScript** | ^5.x | Type safety cho game logic phức tạp (collision, state, commands). IntelliSense tốt khi develop |
 | **Build Tool** | **Vite** | ^6.x | HMR nhanh, hỗ trợ TypeScript out-of-box, build tối ưu, cấu hình tối thiểu |
 | **State Management** | Custom EventEmitter + Command pattern | — | Mọi action (Move, Fire) là Command objects serializable. Dễ tách ra cho multiplayer sau |
+| **Styling** | **Tailwind CSS** | ^4.2 | Utility-first CSS, `@theme` directive cho dark/light tokens, `@tailwindcss/vite` plugin |
+| **Icons** | **lucide-react** | ^1.7 | Icon library React (barrel re-export dưới prefix `Icon*`) + canvas-icons cho Phaser (CanvasTexture từ SVG paths) |
+| **i18n** | **i18next** + **react-i18next** | ^26 / ^17 | Đa ngôn ngữ EN/VI, hook `useTranslation()`, interpolation `{{var}}`, localStorage persistence |
+| **Hooks** | **usehooks-ts** | ^3.1 | Common hooks (useLocalStorage, useDebounceValue, useMediaQuery, ...) — barrel export qua `common/hooks/` |
 
 ### 5.1 Kiến trúc 2 lớp: React (DOM) + Phaser (Canvas)
 
@@ -295,48 +405,72 @@ Hiệu ứng áp dụng **từ lượt tiếp theo**.
 
 Mọi action (di chuyển, bắn) đều là **Command object** → dễ dàng serialize và gửi qua WebSocket khi mở rộng online.
 
-### 6.3 Folder Structure (Dự kiến)
+### 6.3 Folder Structure (Hiện tại)
 
 ```
 mystic-shot-game/
 ├── docs/
 │   └── [design] game-design-document.md
 ├── src/
-│   ├── main.ts                  # Entry point
-│   ├── config.ts                # Game constants
-│   ├── scenes/
-│   │   ├── MenuScene.ts         # Menu screen
-│   │   ├── GameScene.ts         # Main gameplay
-│   │   └── GameOverScene.ts     # Result screen
+│   ├── main.tsx                 # Entry point React — mount App, import i18n
+│   ├── config.ts                # Game constants & enums
+│   ├── styles.css               # Tailwind CSS import, @theme tokens, @layer base
+│   ├── common/
+│   │   ├── icons/
+│   │   │   ├── index.ts         # Barrel re-export lucide-react icons (prefix Icon*)
+│   │   │   └── canvas-icons.ts  # Phaser CanvasTexture cho power-up icons
+│   │   └── hooks/
+│   │       └── index.ts         # Barrel re-export usehooks-ts hooks
+│   ├── i18n/
+│   │   ├── index.ts             # i18next config, EN/VI resources, localStorage
+│   │   └── locales/
+│   │       ├── en.json          # English translations (~110 keys)
+│   │       └── vi.json          # Vietnamese translations (~110 keys)
 │   ├── core/
-│   │   ├── GameState.ts         # State manager
+│   │   ├── EventEmitter.ts      # Pub/sub nhẹ
+│   │   ├── GameState.ts         # State manager + events
 │   │   ├── TurnManager.ts       # Turn logic + timer
+│   │   ├── CollisionSystem.ts   # Collision detection
 │   │   ├── CommandQueue.ts      # Command pattern
-│   │   └── CollisionSystem.ts   # Collision detection
+│   │   ├── Commands.ts          # MoveCommand, FireCommand
+│   │   └── index.ts             # Barrel export
+│   ├── scenes/
+│   │   ├── MenuScene.ts         # Placeholder (React overlay)
+│   │   ├── GameScene.ts         # Main gameplay (registerPowerUpIcons)
+│   │   ├── GameOverScene.ts     # Result screen
+│   │   └── index.ts
 │   ├── entities/
-│   │   ├── Player.ts            # Player entity
-│   │   ├── Obstacle.ts          # Obstacle entity
-│   │   ├── PowerUp.ts           # Power-up entity
-│   │   └── Projectile.ts        # Bullet trajectory
+│   │   ├── Player.ts            # Player circle entity
+│   │   ├── Obstacle.ts          # Obstacle rectangle entity
+│   │   ├── PowerUp.ts           # Power-up icon entity (CanvasTexture)
+│   │   ├── Projectile.ts        # Animated orb + glowing trail entity
+│   │   └── index.ts
 │   ├── math/
-│   │   ├── FunctionParser.ts    # math.js wrapper
+│   │   ├── FunctionParser.ts    # math.js wrapper (sandbox)
 │   │   ├── FunctionValidator.ts # Difficulty-based validation
-│   │   └── GraphRenderer.ts     # Draw function graphs
+│   │   ├── GraphRenderer.ts     # Point sampling cho trajectory
+│   │   └── index.ts
 │   ├── ui/
-│   │   ├── HUD.ts               # HP bars, timer, buffs
-│   │   ├── FormulaInput.ts      # Input field + preview
-│   │   └── ActionButtons.ts     # Move / Fire buttons
-│   ├── input/
-│   │   ├── InputAdapter.ts      # Abstract input interface
-│   │   └── LocalInputAdapter.ts # Local 2-player input
+│   │   ├── App.tsx              # Root — orchestrator mỏng, delegate sang useGameEngine
+│   │   ├── useGameEngine.ts     # Custom hook: game lifecycle, state, handlers
+│   │   ├── HudHeader.tsx        # HP bars, timer, buffs, theme/lang toggles
+│   │   ├── ControlFooter.tsx    # Formula input, direction picker, Move/Fire buttons
+│   │   ├── GameOverOverlay.tsx  # Victory overlay: winner name, back to menu
+│   │   ├── MenuScreen.tsx       # Menu: tên, màu, difficulty, guide
+│   │   ├── PhaserGame.tsx       # Mount Phaser canvas vào React DOM
+│   │   ├── FormulaInput.tsx     # Input + validation + KaTeX preview
+│   │   ├── ThemeToggle.tsx      # useTheme() hook + ThemeToggle component
+│   │   ├── LanguageSwitcher.tsx # EN/VI toggle buttons
+│   │   └── index.ts
 │   └── utils/
 │       ├── MapGenerator.ts      # Random map generation
-│       └── MathUtils.ts         # Helper math functions
-├── public/
-│   └── index.html
+│       ├── MathUtils.ts         # distance(), clamp(), lerp()
+│       └── index.ts
 ├── package.json
 ├── tsconfig.json
-└── vite.config.ts
+├── tsconfig.app.json
+├── vite.config.ts
+└── index.html
 ```
 
 ---
@@ -345,8 +479,11 @@ mystic-shot-game/
 
 ```
 [MENU SCREEN]
-  → Nhập tên P1, P2
+  → Nhập tên P1, P2 (max 16 ký tự, mặc định "Player 1" / "Player 2")
+  → Chọn màu player (6 options, 2 player không được trùng)
   → Chọn difficulty (Easy / Medium / Hard)
+  → [Tuỳ chọn] Xem hướng dẫn game (How to Play — collapsible panel)
+     • Objective, cách nhập hàm, actions, power-ups, obstacles, difficulty rules
   → [START GAME]
 
 [MAP GENERATION]
@@ -380,9 +517,10 @@ mystic-shot-game/
   → Hết 60s mà chưa bắn → auto skip turn
 
 [GAME OVER]
-  → Hiển thị Winner
-  → Stats: tổng damage, số hit, power-ups collected
-  → [Play Again] / [Back to Menu]
+  → React overlay hiển thị trên canvas
+  → Hiển thị tên người thắng ("[Name] Wins!")
+  → [BACK TO MENU] → reset toàn bộ state, quay về Menu Screen
+  → (Tương lai) Stats: tổng damage, số hit, power-ups collected
 ```
 
 ---
@@ -394,7 +532,7 @@ mystic-shot-game/
 | **P0** | Hệ trục tọa độ + grid | Render Oxy, grid lines, labels |
 | **P0** | Render 2 players | Hình tròn tại tọa độ |
 | **P0** | Input hàm số + validate | Text input, math.js parse, difficulty validation |
-| **P0** | Vẽ đồ thị + animation đạn | Đạn bay theo đồ thị hàm số (+x direction) |
+| **P0** | Vẽ đồ thị + animation đạn | Đạn bay theo đồ thị hàm số (hướng đối thủ) |
 | **P0** | Collision detection | Hitbox r=0.5, sample Δx=0.05 |
 | **P0** | HP system + damage | 100 HP, 25 damage mặc định |
 | **P0** | Turn management + timer | Lần lượt, countdown 60s |
@@ -405,8 +543,8 @@ mystic-shot-game/
 | **P1** | Preview đồ thị | Dashed line trước khi Fire/Move |
 | **P1** | Difficulty levels | Easy/Medium/Hard validation |
 | **P1** | Random map generation | Random obstacles + power-ups |
-| **P2** | Menu screen | Tên, difficulty, start |
-| **P2** | Game Over screen | Winner, stats, replay |
+| **P2** | Menu screen | Tên (max 16 chars), chọn màu (6 colors, mutual exclusion), difficulty, start, hướng dẫn game collapsible |
+| **P2** | Game Over screen | React overlay: tên Winner, nút Back to Menu (reset state) |
 | **P2** | KaTeX formula display | Hiển thị công thức đẹp |
 | **P2** | Sound effects | Bắn, hit, nhặt power-up |
 | **P2** | Particle effects | Explosion, hit markers |
@@ -426,5 +564,6 @@ mystic-shot-game/
 - **Hàm số ra ngoài map theo Y**: Đạn biến mất khi y > 15 hoặc y < -15, tiếp tục nếu quay lại trong map (ví dụ sin)
 - **Hết thời gian**: Auto skip turn, không bắn
 - **Cả 2 player hết move charges**: Nút Move bị disable
-- **Player bắn trúng chính mình**: Không xảy ra vì đạn bắt đầu từ vị trí player và bay theo +x
+- **Player bắn trúng chính mình**: Không xảy ra vì đạn bắt đầu từ vị trí player (normalize đảm bảo f(0)=0) và collision bắt đầu từ bước đầu tiên sau player
+- **Hằng số tự do bị loại bỏ**: `f(x) = c` → `c - c + oy = oy` → đường ngang qua player (không thể exploit)
 - **Hard mode reject**: Nếu biểu thức không chứa hàm đặc biệt (sin, cos, tan, log, ln, sqrt, abs) → hiển thị lỗi "Ở Hard mode, hàm phải chứa ít nhất 1 hàm đặc biệt"
