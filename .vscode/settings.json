@@ -1,0 +1,35 @@
+{
+  // ─── Editor ───
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "editor.rulers": [100],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  // ─── Files ───
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.exclude": {
+    "node_modules": true,
+    "dist": true
+  },
+
+  // ─── TypeScript ───
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  // ─── Tailwind CSS ───
+  "tailwindCSS.experimental.classRegex": [
+    ["className\\s*=\\s*['\"]([^'\"]*)['\"]"]
+  ],
+
+  // ─── Search ───
+  "search.exclude": {
+    "dist": true,
+    "node_modules": true,
+    "*.lock": true
+  }
+}
