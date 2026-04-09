@@ -1,5 +1,13 @@
 import { MAP, OBSTACLES, POWERUPS, ObstacleType, PowerUpType } from '../config';
 import type { Position, ObstacleState, PowerUpState } from '../core';
+import type { PresetMap } from '../maps';
+
+export interface MapData {
+  obstacles: ObstacleState[];
+  powerUps: PowerUpState[];
+  player1Pos: Position;
+  player2Pos: Position;
+}
 
 /**
  * Generates random map content: obstacle and power-up placement.
@@ -8,12 +16,7 @@ import type { Position, ObstacleState, PowerUpState } from '../core';
 export class MapGenerator {
   private static nextId = 0;
 
-  static generate(): {
-    obstacles: ObstacleState[];
-    powerUps: PowerUpState[];
-    player1Pos: Position;
-    player2Pos: Position;
-  } {
+  static generate(): MapData {
     this.nextId = 0;
     const occupied: { pos: Position; w: number; h: number }[] = [];
 
@@ -35,8 +38,8 @@ export class MapGenerator {
     const obstacles: ObstacleState[] = [];
 
     for (let i = 0; i < obstacleCount; i++) {
-      const width = this.randomRange(1, 2);
-      const height = this.randomRange(1, 3);
+      const width = this.randomRange(1, 3);
+      const height = this.randomRange(1, 4);
       const pos = this.findFreePosition(occupied, width, height);
       if (!pos) continue;
 
@@ -80,7 +83,7 @@ export class MapGenerator {
     occupied: { pos: Position; w: number; h: number }[],
     width: number,
     height: number,
-    maxAttempts = 50,
+    maxAttempts = 80,
   ): Position | null {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const pos: Position = {
@@ -106,5 +109,36 @@ export class MapGenerator {
 
   private static randomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  /**
+   * Convert a preset map definition into game-ready map data.
+   * Assigns unique IDs and initializes runtime state fields.
+   */
+  static fromPreset(preset: PresetMap): MapData {
+    this.nextId = 0;
+
+    const obstacles: ObstacleState[] = preset.obstacles.map((o) => ({
+      id: `obs_${this.nextId++}`,
+      type: o.type,
+      position: { ...o.position },
+      width: o.width,
+      height: o.height,
+      destroyed: false,
+    }));
+
+    const powerUps: PowerUpState[] = preset.powerUps.map((p) => ({
+      id: `pu_${this.nextId++}`,
+      type: p.type,
+      position: { ...p.position },
+      collected: false,
+    }));
+
+    return {
+      obstacles,
+      powerUps,
+      player1Pos: { ...preset.player1Spawn },
+      player2Pos: { ...preset.player2Spawn },
+    };
   }
 }

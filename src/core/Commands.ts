@@ -126,7 +126,7 @@ export class FireCommand implements Command {
       // Apply damage if hit (BEFORE collecting power-ups — GDD: buffs apply from next turn)
       if (this.result.hit && this.result.targetId) {
         const dmg = this.gameState.hasBuff(this.playerId, PowerUpType.DoubleDamage)
-          ? PLAYER.DEFAULT_DAMAGE * 2
+          ? PLAYER.DEFAULT_DAMAGE * POWERUPS.DOUBLE_DAMAGE_MULTIPLIER
           : PLAYER.DEFAULT_DAMAGE;
         this.gameState.applyDamage(this.result.targetId, dmg);
 

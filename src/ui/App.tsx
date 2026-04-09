@@ -19,6 +19,7 @@ export function App() {
     animating,
     handleMove,
     handleFire,
+    handlePreview,
     handleMenuStart,
     handleBackToMenu,
   } = useGameEngine();
@@ -35,7 +36,7 @@ export function App() {
 
       <main
         style={{ display: gameStarted && !gameOver ? 'flex' : 'none' }}
-        className="flex-1 flex items-center justify-center overflow-hidden"
+        className="flex-1 flex items-center justify-center overflow-x-auto overflow-y-hidden min-h-0 py-2"
       >
         <PhaserGame ref={phaserRef} gameState={gameState} />
       </main>
@@ -45,6 +46,7 @@ export function App() {
           snapshot={snapshot}
           onMove={handleMove}
           onFire={handleFire}
+          onPreview={handlePreview}
           disabled={animating}
         />
       )}

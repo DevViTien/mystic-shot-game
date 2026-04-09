@@ -1,0 +1,23 @@
+{
+  "id": "arena",
+  "nameKey": "map.arena.name",
+  "descriptionKey": "map.arena.description",
+  "player1Spawn": { "x": -19, "y": 0 },
+  "player2Spawn": { "x": 19, "y": 0 },
+  "obstacles": [
+    { "type": "hard", "position": { "x": -7, "y": 7 }, "width": 2, "height": 2.5 },
+    { "type": "hard", "position": { "x": 7, "y": -7 }, "width": 2, "height": 2.5 },
+    { "type": "soft", "position": { "x": 0, "y": 10 }, "width": 3, "height": 1.5 },
+    { "type": "soft", "position": { "x": 0, "y": -10 }, "width": 3, "height": 1.5 },
+    { "type": "hard", "position": { "x": -14, "y": -6 }, "width": 1.5, "height": 2 },
+    { "type": "hard", "position": { "x": 14, "y": 6 }, "width": 1.5, "height": 2 }
+  ],
+  "powerUps": [
+    { "type": "double_damage", "position": { "x": 0, "y": 0 } },
+    { "type": "shield", "position": { "x": 0, "y": 6 } },
+    { "type": "extra_move", "position": { "x": 0, "y": -6 } },
+    { "type": "piercing", "position": { "x": -10, "y": 3 } },
+    { "type": "knockback", "position": { "x": 10, "y": -3 } }
+  ],
+  "tags": ["competitive", "open"]
+}

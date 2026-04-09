@@ -1,0 +1,24 @@
+{
+  "id": "fortress",
+  "nameKey": "map.fortress.name",
+  "descriptionKey": "map.fortress.description",
+  "player1Spawn": { "x": -19, "y": 0 },
+  "player2Spawn": { "x": 19, "y": 0 },
+  "obstacles": [
+    { "type": "hard", "position": { "x": -13, "y": 5 }, "width": 2.5, "height": 1.5 },
+    { "type": "hard", "position": { "x": -13, "y": -5 }, "width": 2.5, "height": 1.5 },
+    { "type": "hard", "position": { "x": -16, "y": 0 }, "width": 1.5, "height": 3 },
+    { "type": "hard", "position": { "x": 13, "y": 5 }, "width": 2.5, "height": 1.5 },
+    { "type": "hard", "position": { "x": 13, "y": -5 }, "width": 2.5, "height": 1.5 },
+    { "type": "hard", "position": { "x": 16, "y": 0 }, "width": 1.5, "height": 3 },
+    { "type": "soft", "position": { "x": -5, "y": 8 }, "width": 2, "height": 2 },
+    { "type": "soft", "position": { "x": 5, "y": -8 }, "width": 2, "height": 2 }
+  ],
+  "powerUps": [
+    { "type": "piercing", "position": { "x": -4, "y": 0 } },
+    { "type": "piercing", "position": { "x": 4, "y": 0 } },
+    { "type": "double_damage", "position": { "x": 0, "y": 5 } },
+    { "type": "shield", "position": { "x": 0, "y": -5 } }
+  ],
+  "tags": ["competitive", "defensive"]
+}

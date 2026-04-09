@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Difficulty } from '../config';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { SkinPicker } from './SkinPicker';
+import { MapPicker } from './MapPicker';
 import { useTranslation } from 'react-i18next';
-import { AppImage, Modal } from '../common/components';
+import { AppImage, Modal, Tooltip } from '../common/components';
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -24,12 +26,14 @@ import {
 export interface PlayerConfig {
   name: string;
   color: string;
+  skinId: string;
 }
 
 export interface MenuResult {
   player1: PlayerConfig;
   player2: PlayerConfig;
   difficulty: Difficulty;
+  mapId: string;
 }
 
 const COLOR_OPTIONS = [
@@ -53,20 +57,24 @@ export function MenuScreen({ onStart, theme, onToggleTheme }: MenuScreenProps) {
   const [p2Name, setP2Name] = useState(t('menu.player2'));
   const [p1Color, setP1Color] = useState('#00ccff');
   const [p2Color, setP2Color] = useState('#ff4466');
+  const [p1Skin, setP1Skin] = useState('classic');
+  const [p2Skin, setP2Skin] = useState('classic');
   const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.Easy);
+  const [mapId, setMapId] = useState('random');
   const [showGuide, setShowGuide] = useState(false);
 
   const handleStart = () => {
     onStart({
-      player1: { name: p1Name || t('menu.player1'), color: p1Color },
-      player2: { name: p2Name || t('menu.player2'), color: p2Color },
+      player1: { name: p1Name || t('menu.player1'), color: p1Color, skinId: p1Skin },
+      player2: { name: p2Name || t('menu.player2'), color: p2Color, skinId: p2Skin },
       difficulty,
+      mapId,
     });
   };
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-overlay">
-      <div className="bg-surface border border-border rounded-xl px-12 py-10 max-w-[600px] max-h-[90vh] overflow-y-auto w-full flex flex-col items-center gap-6 relative">
+      <div className="bg-surface border border-border rounded-xl px-6 py-5 max-w-[720px] max-h-[90vh] overflow-y-auto w-full flex flex-col items-center gap-6 relative">
         <div className="absolute top-4 right-4 flex items-center gap-1.5">
           <LanguageSwitcher />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
@@ -103,9 +111,10 @@ export function MenuScreen({ onStart, theme, onToggleTheme }: MenuScreenProps) {
                 />
               ))}
             </div>
+            <SkinPicker skinId={p1Skin} onChange={setP1Skin} color={p1Color} />
           </div>
 
-          <div className="text-2xl font-extrabold text-text-muted pt-7">{t('menu.versus')}</div>
+          <div className="text-2xl font-extrabold text-text-muted pt-9">{t('menu.versus')}</div>
 
           {/* Player 2 */}
           <div className="flex-1 flex flex-col items-center gap-2.5">
@@ -132,6 +141,7 @@ export function MenuScreen({ onStart, theme, onToggleTheme }: MenuScreenProps) {
                 />
               ))}
             </div>
+            <SkinPicker skinId={p2Skin} onChange={setP2Skin} color={p2Color} />
           </div>
         </div>
 
@@ -141,16 +151,19 @@ export function MenuScreen({ onStart, theme, onToggleTheme }: MenuScreenProps) {
           </span>
           <div className="flex gap-2">
             {Object.values(Difficulty).map((d) => (
-              <button
-                key={d}
-                className={`px-4 py-1.5 text-[13px] font-semibold rounded cursor-pointer border-none transition-opacity duration-150 ${difficulty === d ? 'bg-accent text-black' : 'bg-surface-alt text-text-muted'}`}
-                onClick={() => setDifficulty(d)}
-              >
-                {d.charAt(0).toUpperCase() + d.slice(1)}
-              </button>
+              <Tooltip key={d} content={t(`menu.difficultyTooltip.${d}`)}>
+                <button
+                  className={`px-4 py-1.5 text-[13px] font-semibold rounded cursor-pointer border-none transition-opacity duration-150 ${difficulty === d ? 'bg-accent text-black' : 'bg-surface-alt text-text-muted'}`}
+                  onClick={() => setDifficulty(d)}
+                >
+                  {d.charAt(0).toUpperCase() + d.slice(1)}
+                </button>
+              </Tooltip>
             ))}
           </div>
         </div>
+
+        <MapPicker mapId={mapId} onChange={setMapId} />
 
         <button
           className="mt-2 px-12 py-3 text-lg font-bold tracking-[2px] rounded-md bg-accent text-black cursor-pointer border-none hover:opacity-85 transition-opacity duration-150"
@@ -206,7 +219,12 @@ export function MenuScreen({ onStart, theme, onToggleTheme }: MenuScreenProps) {
                   <span className="font-bold text-[13px] min-w-10 text-warning">
                     {t('guide.actions.fireLabel')}
                   </span>
-                  <span className="text-[13px] text-text-soft">{t('guide.actions.fireDesc')}</span>
+                  <span className="text-[13px] text-text-soft">
+                    {t('guide.actions.fireDesc').split('<chevronLeft/>')[0]}
+                    <IconChevronLeft size={12} className="inline" /> /{' '}
+                    <IconChevronRight size={12} className="inline" />
+                    {t('guide.actions.fireDesc').split('<chevronRight/>')[1]}
+                  </span>
                 </div>
                 <div className="flex gap-2.5 items-baseline">
                   <span className="font-bold text-[13px] min-w-10 text-warning">

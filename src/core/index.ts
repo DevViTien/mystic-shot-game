@@ -9,6 +9,7 @@ export type {
   PowerUpState,
   GameStateSnapshot,
   GameEventMap,
+  PreviewData,
 } from './GameState';
 export { CommandQueue } from './CommandQueue';
 export { MoveCommand, FireCommand } from './Commands';

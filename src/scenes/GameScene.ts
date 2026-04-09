@@ -1,12 +1,13 @@
 import Phaser from 'phaser';
 import i18next from 'i18next';
 import { MAP, PLAYER, PHASER_CONFIG } from '../config';
-import { GameState, GameEvent, type GameStateSnapshot, type Position } from '../core';
+import { GameState, GameEvent, type GameStateSnapshot, type Position, type PreviewData } from '../core';
 import { Player } from '../entities/Player';
 import { Obstacle } from '../entities/Obstacle';
 import { PowerUp } from '../entities/PowerUp';
 import { Projectile } from '../entities/Projectile';
-import { registerPowerUpIcons } from '../common/icons/canvas-icons';
+import { SkinRegistry, registerThemedPowerUpIcons } from '../skins';
+import type { SkinSet } from '../skins';
 
 /**
  * Scale factors: game units → screen pixels.
@@ -37,7 +38,10 @@ export class GameScene extends Phaser.Scene {
   private obstacleEntities: Obstacle[] = [];
   private powerUpEntities: PowerUp[] = [];
   private projectile: Projectile | null = null;
+  private previewGraphics!: Phaser.GameObjects.Graphics;
   private unsubscribers: (() => void)[] = [];
+  private p1Skin!: SkinSet;
+  private p2Skin!: SkinSet;
 
   // Tooltip system
   private tooltipContainer!: Phaser.GameObjects.Container;
@@ -56,11 +60,22 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
-    // Register power-up icon textures before creating entities
-    registerPowerUpIcons(this);
+    // Resolve skins from registry
+    const p1SkinId = (this.registry.get('p1Skin') as string) ?? 'classic';
+    const p2SkinId = (this.registry.get('p2Skin') as string) ?? 'classic';
+    this.p1Skin = SkinRegistry.get(p1SkinId);
+    this.p2Skin = SkinRegistry.get(p2SkinId);
+
+    // Register themed power-up textures (deduplicated internally)
+    registerThemedPowerUpIcons(this, this.p1Skin.powerUp.theme);
+    registerThemedPowerUpIcons(this, this.p2Skin.powerUp.theme);
 
     this.gridGraphics = this.add.graphics();
     this.drawGrid();
+
+    // Preview layer — sits above grid, below entities
+    this.previewGraphics = this.add.graphics();
+    this.previewGraphics.setDepth(10);
 
     const snapshot = this.gameState.getSnapshot();
 
@@ -72,10 +87,10 @@ export class GameScene extends Phaser.Scene {
     const p1Color = this.registry.get('p1Color') ?? PHASER_CONFIG.PLAYER1_COLOR;
     const p2Color = this.registry.get('p2Color') ?? PHASER_CONFIG.PLAYER2_COLOR;
 
-    this.player1 = new Player(1, p1Screen, p1Color, playerScreenRadius);
+    this.player1 = new Player(1, p1Screen, p1Color, playerScreenRadius, this.p1Skin.player);
     this.player1.create(this);
 
-    this.player2 = new Player(2, p2Screen, p2Color, playerScreenRadius);
+    this.player2 = new Player(2, p2Screen, p2Color, playerScreenRadius, this.p2Skin.player);
     this.player2.create(this);
 
     // Create obstacles
@@ -90,10 +105,12 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Create power-ups
+    // Determine power-up theme — use current player's skin theme
+    const puTheme = this.p1Skin.powerUp.theme;
     for (const pu of snapshot.powerUps) {
       if (pu.collected) continue;
       const screenPos = worldToScreen(pu.position.x, pu.position.y);
-      const entity = new PowerUp(pu.id, pu.type, screenPos);
+      const entity = new PowerUp(pu.id, pu.type, screenPos, puTheme);
       entity.create(this);
       this.powerUpEntities.push(entity);
     }
@@ -109,6 +126,12 @@ export class GameScene extends Phaser.Scene {
       this.onFireComplete(trajectory, playerId);
     });
     this.unsubscribers.push(unsubFire);
+
+    // Listen for preview updates
+    const unsubPreview = this.gameState.on(GameEvent.PreviewUpdate, (data) => {
+      this.onPreviewUpdate(data);
+    });
+    this.unsubscribers.push(unsubPreview);
 
     // Tooltip system
     this.createTooltip();
@@ -204,6 +227,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private onFireComplete(trajectory: Position[], playerId: 1 | 2): void {
+    // Clear preview when firing
+    this.previewGraphics.clear();
+
     // Clean up previous projectile
     this.projectile?.destroy();
 
@@ -213,12 +239,80 @@ export class GameScene extends Phaser.Scene {
       playerId === 1
         ? (this.registry.get('p1Color') ?? PHASER_CONFIG.PLAYER1_COLOR)
         : (this.registry.get('p2Color') ?? PHASER_CONFIG.PLAYER2_COLOR);
+    const trailSkin = playerId === 1 ? this.p1Skin.trail : this.p2Skin.trail;
 
-    this.projectile = new Projectile(screenTrajectory, color);
+    this.projectile = new Projectile(screenTrajectory, color, trailSkin);
     this.projectile.create(this);
     this.projectile.animate(() => {
       this.gameState.emit(GameEvent.FireAnimationDone);
     });
+  }
+
+  private onPreviewUpdate(data: PreviewData | null): void {
+    this.previewGraphics.clear();
+    if (!data || data.points.length < 2) return;
+
+    const snap = this.gameState.getSnapshot();
+    const color =
+      snap.currentPlayerId === 1
+        ? (this.registry.get('p1Color') ?? PHASER_CONFIG.PLAYER1_COLOR)
+        : (this.registry.get('p2Color') ?? PHASER_CONFIG.PLAYER2_COLOR);
+
+    // Draw dashed preview line
+    const screenPoints = data.points.map((p) => worldToScreen(p.x, p.y));
+    const dashLen = 6;
+    const gapLen = 4;
+
+    this.previewGraphics.lineStyle(1.5, color, 0.4);
+
+    let drawing = true;
+    let segAcc = 0;
+
+    for (let i = 0; i < screenPoints.length - 1; i++) {
+      const ax = screenPoints[i]!.x;
+      const ay = screenPoints[i]!.y;
+      const bx = screenPoints[i + 1]!.x;
+      const by = screenPoints[i + 1]!.y;
+      const dx = bx - ax;
+      const dy = by - ay;
+      const segLen = Math.sqrt(dx * dx + dy * dy);
+
+      if (segLen === 0) continue;
+
+      let consumed = 0;
+      while (consumed < segLen) {
+        const limit = drawing ? dashLen : gapLen;
+        const remaining = limit - segAcc;
+        const available = segLen - consumed;
+        const step = Math.min(remaining, available);
+
+        const t0 = consumed / segLen;
+        const t1 = (consumed + step) / segLen;
+        const x0 = ax + dx * t0;
+        const y0 = ay + dy * t0;
+        const x1 = ax + dx * t1;
+        const y1 = ay + dy * t1;
+
+        if (drawing) {
+          this.previewGraphics.beginPath();
+          this.previewGraphics.moveTo(x0, y0);
+          this.previewGraphics.lineTo(x1, y1);
+          this.previewGraphics.strokePath();
+        }
+
+        consumed += step;
+        segAcc += step;
+        if (segAcc >= limit) {
+          segAcc = 0;
+          drawing = !drawing;
+        }
+      }
+    }
+
+    // End-point marker (small dot)
+    const last = screenPoints[screenPoints.length - 1]!;
+    this.previewGraphics.fillStyle(color, 0.5);
+    this.previewGraphics.fillCircle(last.x, last.y, 3);
   }
 
   // ─── Tooltip system ────────────────────────────────────

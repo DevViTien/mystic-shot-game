@@ -1,14 +1,13 @@
 import type { Position } from '../core';
+import type { TrailSkin } from '../skins';
+import { TrailStyleRenderer } from '../skins';
 
 /** How many trajectory points to advance per frame (~60fps) */
 const POINTS_PER_FRAME = 12;
-/** How many trailing points to keep for the glow tail */
-const TAIL_LENGTH = 30;
-/** Orb radius in screen pixels */
-const ORB_RADIUS = 5;
 
 /**
  * Projectile entity — animated orb traveling along a trajectory with glowing trail.
+ * Delegates visual rendering to TrailStyleRenderer for skin support.
  */
 export class Projectile {
   private trailGraphics: Phaser.GameObjects.Graphics | null = null;
@@ -21,6 +20,7 @@ export class Projectile {
   constructor(
     private trajectory: Position[],
     private color: number,
+    private skin: TrailSkin = { style: 'solid', particleEmitter: false, widthMultiplier: 1.0, fadeSpeed: 1.0 },
   ) {}
 
   create(scene: Phaser.Scene): void {
@@ -52,45 +52,15 @@ export class Projectile {
     // Advance along trajectory
     this.currentIndex = Math.min(this.currentIndex + POINTS_PER_FRAME, this.trajectory.length - 1);
 
-    // Draw trail (fading tail)
-    this.trailGraphics.clear();
-    const tailStart = Math.max(0, this.currentIndex - TAIL_LENGTH);
-
-    // Dim trail behind the tail
-    if (tailStart > 0) {
-      this.trailGraphics.lineStyle(1, this.color, 0.15);
-      this.trailGraphics.beginPath();
-      this.trailGraphics.moveTo(this.trajectory[0]!.x, this.trajectory[0]!.y);
-      for (let i = 1; i <= tailStart; i++) {
-        this.trailGraphics.lineTo(this.trajectory[i]!.x, this.trajectory[i]!.y);
-      }
-      this.trailGraphics.strokePath();
-    }
-
-    // Bright gradient tail
-    for (let i = tailStart; i < this.currentIndex; i++) {
-      const t = (i - tailStart) / TAIL_LENGTH; // 0 → 1 (dim → bright)
-      const alpha = 0.1 + t * 0.7;
-      const width = 1 + t * 2;
-      this.trailGraphics.lineStyle(width, this.color, alpha);
-      this.trailGraphics.beginPath();
-      this.trailGraphics.moveTo(this.trajectory[i]!.x, this.trajectory[i]!.y);
-      this.trailGraphics.lineTo(this.trajectory[i + 1]!.x, this.trajectory[i + 1]!.y);
-      this.trailGraphics.strokePath();
-    }
-
-    // Draw orb (glowing circle)
-    const pos = this.trajectory[this.currentIndex]!;
-    this.orb.clear();
-    // Outer glow
-    this.orb.fillStyle(this.color, 0.15);
-    this.orb.fillCircle(pos.x, pos.y, ORB_RADIUS * 3);
-    // Mid glow
-    this.orb.fillStyle(this.color, 0.35);
-    this.orb.fillCircle(pos.x, pos.y, ORB_RADIUS * 1.8);
-    // Core
-    this.orb.fillStyle(0xffffff, 0.9);
-    this.orb.fillCircle(pos.x, pos.y, ORB_RADIUS * 0.7);
+    // Delegate rendering to skin-aware renderer
+    TrailStyleRenderer.drawFrame(
+      this.trailGraphics,
+      this.orb,
+      this.trajectory,
+      this.currentIndex,
+      this.skin,
+      this.color,
+    );
 
     // Check if done
     if (this.currentIndex >= this.trajectory.length - 1) {
@@ -112,11 +82,11 @@ export class Projectile {
           const pos = this.trajectory[this.trajectory.length - 1]!;
           this.orb?.clear();
           this.orb?.fillStyle(this.color, 0.15 * target.alpha);
-          this.orb?.fillCircle(pos.x, pos.y, ORB_RADIUS * 3);
+          this.orb?.fillCircle(pos.x, pos.y, 5 * 3);
           this.orb?.fillStyle(this.color, 0.35 * target.alpha);
-          this.orb?.fillCircle(pos.x, pos.y, ORB_RADIUS * 1.8);
+          this.orb?.fillCircle(pos.x, pos.y, 5 * 1.8);
           this.orb?.fillStyle(0xffffff, 0.9 * target.alpha);
-          this.orb?.fillCircle(pos.x, pos.y, ORB_RADIUS * 0.7);
+          this.orb?.fillCircle(pos.x, pos.y, 5 * 0.7);
         },
         onComplete: () => {
           this.orb?.clear();
@@ -127,16 +97,9 @@ export class Projectile {
       this.onComplete?.();
     }
 
-    // Fade trail to static dim line
+    // Draw static trail
     if (this.trailGraphics) {
-      this.trailGraphics.clear();
-      this.trailGraphics.lineStyle(1, this.color, 0.25);
-      this.trailGraphics.beginPath();
-      this.trailGraphics.moveTo(this.trajectory[0]!.x, this.trajectory[0]!.y);
-      for (let i = 1; i < this.trajectory.length; i++) {
-        this.trailGraphics.lineTo(this.trajectory[i]!.x, this.trajectory[i]!.y);
-      }
-      this.trailGraphics.strokePath();
+      TrailStyleRenderer.drawStatic(this.trailGraphics, this.trajectory, this.color);
     }
   }
 

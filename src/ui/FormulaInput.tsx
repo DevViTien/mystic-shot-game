@@ -10,8 +10,11 @@ import { useDebounceValue } from '../common/hooks';
 interface FormulaInputProps {
   difficulty: Difficulty;
   onSubmit: (expression: string) => void;
+  onMove?: (expression: string) => void;
+  onDirectionToggle?: () => void;
   onChange?: (expression: string, valid: boolean) => void;
   disabled?: boolean;
+  canMove?: boolean;
   placeholder?: string;
 }
 
@@ -21,8 +24,11 @@ interface FormulaInputProps {
 export function FormulaInput({
   difficulty,
   onSubmit,
+  onMove,
+  onDirectionToggle,
   onChange,
   disabled = false,
+  canMove = false,
   placeholder,
 }: FormulaInputProps) {
   const { t } = useTranslation();
@@ -88,40 +94,55 @@ export function FormulaInput({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        onDirectionToggle?.();
+        return;
+      }
+      if (e.key === 'Enter' && e.shiftKey) {
+        e.preventDefault();
+        if (canMove && validation.valid && expression.trim() !== '') {
+          onMove?.(expression.trim());
+          setExpression('');
+        }
+        return;
+      }
       if (e.key === 'Enter') {
         handleSubmit();
       }
     },
-    [handleSubmit],
+    [handleSubmit, onMove, onDirectionToggle, canMove, validation, expression],
   );
 
   const hasError = !validation.valid && !!validation.error;
 
   return (
-    <div className="flex items-center gap-2">
-      <label htmlFor="formula" className="text-sm font-semibold whitespace-nowrap">
-        {t('formula.label')}
-      </label>
-      <input
-        id="formula"
-        type="text"
-        value={expression}
-        autoFocus
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-        placeholder={placeholder || t('formula.placeholder')}
-        autoComplete="off"
-        spellCheck={false}
-        maxLength={100}
-        className="flex-1 px-2.5 py-1 text-sm font-mono bg-surface-input text-text-primary border border-border-input rounded outline-none focus:border-accent"
-        title={hasError ? validation.error : undefined}
-      />
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <label htmlFor="formula" className="text-sm font-semibold whitespace-nowrap">
+          {t('formula.label')}
+        </label>
+        <input
+          id="formula"
+          type="text"
+          value={expression}
+          autoFocus
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          disabled={disabled}
+          placeholder={placeholder || t('formula.placeholder')}
+          autoComplete="off"
+          spellCheck={false}
+          maxLength={100}
+          className="flex-1 px-2.5 py-1 text-sm font-mono bg-surface-input text-text-primary border border-border-input rounded outline-none focus:border-accent"
+          title={hasError ? validation.error : undefined}
+        />
+      </div>
       {hasError && (
-        <span className="text-xs text-danger whitespace-nowrap">{validation.error}</span>
+        <span className="text-xs text-danger pl-[3.25rem]">{validation.error}</span>
       )}
       {!hasError && debouncedExpr.trim() !== '' && (
-        <div className="text-sm whitespace-nowrap" ref={katexRef} />
+        <div className="text-sm pl-[3.25rem]" ref={katexRef} />
       )}
     </div>
   );

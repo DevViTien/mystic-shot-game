@@ -39,6 +39,10 @@ export const PhaserGame = forwardRef<PhaserGameHandle, PhaserGameProps>(function
       parent: containerRef.current,
       backgroundColor: PHASER_CONFIG.BACKGROUND_COLOR,
       scene: [MenuScene, GameScene, GameOverScene],
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+      },
     };
 
     const game = new Phaser.Game(config);

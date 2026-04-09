@@ -7,9 +7,57 @@
     "playerNamePlaceholder": "Enter name",
     "versus": "VS",
     "difficulty": "Difficulty",
+    "difficultyTooltip": {
+      "easy": "Polynomials only\ne.g. x², 2x+1, x³-x\nSimple curves, great for beginners.",
+      "medium": "Polynomials + trig, log, sqrt\ne.g. sin(x), sqrt(x), log(x)\nMore creative trajectories.",
+      "hard": "Must include ≥1 special function\ne.g. sin, cos, log, sqrt…\nPure polynomials are rejected."
+    },
     "startGame": "START GAME",
     "showGuide": "How to Play",
-    "hideGuide": "Hide Guide"
+    "hideGuide": "Hide Guide",
+    "skin": "Skin",
+    "map": "Map"
+  },
+  "skin": {
+    "classic": "Classic",
+    "neon": "Neon",
+    "geometric": "Geometric",
+    "starlight": "Starlight",
+    "pixel": "Pixel"
+  },
+  "map": {
+    "random": {
+      "name": "Random",
+      "description": "Random obstacles and power-ups each match"
+    },
+    "arena": {
+      "name": "Arena",
+      "description": "Open field, skill-based combat"
+    },
+    "fortress": {
+      "name": "Fortress",
+      "description": "Walled fortresses, needs curved shots"
+    },
+    "maze": {
+      "name": "Maze",
+      "description": "Complex paths with mixed obstacles"
+    },
+    "sniper": {
+      "name": "Sniper Alley",
+      "description": "Narrow lanes, precision shots"
+    },
+    "mirror": {
+      "name": "Mirror",
+      "description": "Perfectly symmetrical layout"
+    },
+    "chaos": {
+      "name": "Chaos",
+      "description": "All soft obstacles, lots of power-ups"
+    },
+    "duel": {
+      "name": "Duel",
+      "description": "No obstacles, pure math skill"
+    }
   },
   "color": {
     "cyan": "Cyan",
@@ -22,7 +70,12 @@
   "hud": {
     "yourTurn": "YOUR TURN",
     "hp": "{{hp}} HP",
-    "timer": "{{seconds}}s"
+    "timer": "{{seconds}}s",
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    }
   },
   "footer": {
     "playerTurn": "{{name}}'s Turn",
@@ -65,7 +118,7 @@
     "actions": {
       "heading": "Actions",
       "fireLabel": "Fire",
-      "fireDesc": "Shoots a projectile along f(x) toward the opponent",
+      "fireDesc": "Shoots a projectile along f(x) in your chosen direction (<chevronLeft/> / <chevronRight/>)",
       "moveLabel": "Move",
       "moveDesc": "Move along f(x) up to 5 units of arc length (choose <chevronLeft/> / <chevronRight/> direction)"
     },

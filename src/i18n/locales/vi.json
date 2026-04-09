@@ -7,9 +7,57 @@
     "playerNamePlaceholder": "Nhập tên",
     "versus": "VS",
     "difficulty": "Độ khó",
+    "difficultyTooltip": {
+      "easy": "Chỉ đa thức\nVí dụ: x², 2x+1, x³-x\nĐường cong đơn giản, phù hợp người mới.",
+      "medium": "Đa thức + lượng giác, log, sqrt\nVí dụ: sin(x), sqrt(x), log(x)\nQuỹ đạo đa dạng hơn.",
+      "hard": "Bắt buộc có ít nhất 1 hàm đặc biệt\nVí dụ: sin, cos, log, sqrt…\nĐa thức thuần sẽ bị từ chối."
+    },
     "startGame": "BẮT ĐẦU",
     "showGuide": "Hướng dẫn",
-    "hideGuide": "Ẩn hướng dẫn"
+    "hideGuide": "Ẩn hướng dẫn",
+    "skin": "Giao diện",
+    "map": "Bản đồ"
+  },
+  "skin": {
+    "classic": "Cổ điển",
+    "neon": "Neon",
+    "geometric": "Hình học",
+    "starlight": "Ánh sao",
+    "pixel": "Pixel"
+  },
+  "map": {
+    "random": {
+      "name": "Ngẫu nhiên",
+      "description": "Vật cản và vật phẩm ngẫu nhiên mỗi trận"
+    },
+    "arena": {
+      "name": "Đấu trường",
+      "description": "Sân mở, thi đấu kỹ năng"
+    },
+    "fortress": {
+      "name": "Pháo đài",
+      "description": "Tường bao quanh, cần bắn vòng cung"
+    },
+    "maze": {
+      "name": "Mê cung",
+      "description": "Đường đi phức tạp với nhiều vật cản"
+    },
+    "sniper": {
+      "name": "Hẻm bắn tỉa",
+      "description": "Hành lang hẹp, bắn chính xác"
+    },
+    "mirror": {
+      "name": "Gương",
+      "description": "Bố cục đối xứng hoàn hảo"
+    },
+    "chaos": {
+      "name": "Hỗn loạn",
+      "description": "Toàn vật cản mềm, nhiều vật phẩm"
+    },
+    "duel": {
+      "name": "Đấu tay đôi",
+      "description": "Không vật cản, thuần kỹ năng toán"
+    }
   },
   "color": {
     "cyan": "Lam",
@@ -22,7 +70,12 @@
   "hud": {
     "yourTurn": "LƯỢT CỦA BẠN",
     "hp": "{{hp}} HP",
-    "timer": "{{seconds}}s"
+    "timer": "{{seconds}}s",
+    "difficulty": {
+      "easy": "Dễ",
+      "medium": "Trung bình",
+      "hard": "Khó"
+    }
   },
   "footer": {
     "playerTurn": "Lượt của {{name}}",
@@ -65,7 +118,7 @@
     "actions": {
       "heading": "Hành động",
       "fireLabel": "Bắn",
-      "fireDesc": "Bắn đạn theo f(x) về phía đối thủ",
+      "fireDesc": "Bắn đạn theo f(x) theo hướng bạn chọn (<chevronLeft/> / <chevronRight/>)",
       "moveLabel": "Di chuyển",
       "moveDesc": "Di chuyển theo f(x) tối đa 5 đơn vị độ dài cung (chọn hướng <chevronLeft/> / <chevronRight/>)"
     },

@@ -1,0 +1,15 @@
+{
+  "id": "duel",
+  "nameKey": "map.duel.name",
+  "descriptionKey": "map.duel.description",
+  "player1Spawn": { "x": -18, "y": 0 },
+  "player2Spawn": { "x": 18, "y": 0 },
+  "obstacles": [],
+  "powerUps": [
+    { "type": "double_damage", "position": { "x": 0, "y": 4 } },
+    { "type": "shield", "position": { "x": 0, "y": -4 } },
+    { "type": "extra_move", "position": { "x": -10, "y": 0 } },
+    { "type": "extra_move", "position": { "x": 10, "y": 0 } }
+  ],
+  "tags": ["competitive", "open"]
+}

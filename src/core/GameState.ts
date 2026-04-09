@@ -16,6 +16,7 @@ export interface PlayerState {
   moveCharges: number;
   damage: number;
   buffs: ActiveBuff[];
+  skinId: string;
 }
 
 export interface ActiveBuff {
@@ -52,6 +53,12 @@ export enum GameEvent {
   GameOver = 'game:over',
   FireComplete = 'fire:complete',
   FireAnimationDone = 'fire:animation:done',
+  PreviewUpdate = 'preview:update',
+}
+
+export interface PreviewData {
+  points: Position[];
+  mode: 'fire' | 'move';
 }
 
 export interface GameEventMap {
@@ -67,6 +74,7 @@ export interface GameEventMap {
   [GameEvent.GameOver]: [{ winnerId: 1 | 2 }];
   [GameEvent.FireComplete]: [{ trajectory: Position[]; playerId: 1 | 2 }];
   [GameEvent.FireAnimationDone]: [];
+  [GameEvent.PreviewUpdate]: [PreviewData | null];
 }
 
 // --- GameState ---
@@ -100,7 +108,7 @@ export class GameState extends EventEmitter<GameEventMap> {
     ];
   }
 
-  private createDefaultPlayer(id: 1 | 2, name: string, position: Position): PlayerState {
+  private createDefaultPlayer(id: 1 | 2, name: string, position: Position, skinId = 'classic'): PlayerState {
     return {
       id,
       name,
@@ -109,6 +117,7 @@ export class GameState extends EventEmitter<GameEventMap> {
       moveCharges: PLAYER.INITIAL_MOVE_CHARGES,
       damage: PLAYER.DEFAULT_DAMAGE,
       buffs: [],
+      skinId,
     };
   }
 
@@ -123,6 +132,8 @@ export class GameState extends EventEmitter<GameEventMap> {
     startingPlayer: 1 | 2;
     player1Pos: Position;
     player2Pos: Position;
+    player1SkinId?: string;
+    player2SkinId?: string;
   }): void {
     this.difficulty = config.difficulty;
     this.obstacles = config.obstacles;
@@ -132,8 +143,8 @@ export class GameState extends EventEmitter<GameEventMap> {
     this.phase = TurnPhase.Idle;
 
     this.players = [
-      this.createDefaultPlayer(1, config.player1Name, config.player1Pos),
-      this.createDefaultPlayer(2, config.player2Name, config.player2Pos),
+      this.createDefaultPlayer(1, config.player1Name, config.player1Pos, config.player1SkinId),
+      this.createDefaultPlayer(2, config.player2Name, config.player2Pos, config.player2SkinId),
     ];
 
     this.emitStateChanged();
@@ -309,6 +320,7 @@ export class GameState extends EventEmitter<GameEventMap> {
       ...player,
       position: { ...player.position },
       buffs: player.buffs.map((b) => ({ ...b })),
+      skinId: player.skinId,
     };
   }
 

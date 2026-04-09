@@ -1,0 +1,26 @@
+{
+  "id": "chaos",
+  "nameKey": "map.chaos.name",
+  "descriptionKey": "map.chaos.description",
+  "player1Spawn": { "x": -19, "y": 0 },
+  "player2Spawn": { "x": 19, "y": 0 },
+  "obstacles": [
+    { "type": "soft", "position": { "x": -10, "y": 6 }, "width": 2.5, "height": 2 },
+    { "type": "soft", "position": { "x": -5, "y": -7 }, "width": 2, "height": 2.5 },
+    { "type": "soft", "position": { "x": 0, "y": 3 }, "width": 2.5, "height": 2.5 },
+    { "type": "soft", "position": { "x": 5, "y": 7 }, "width": 2, "height": 2.5 },
+    { "type": "soft", "position": { "x": 10, "y": -6 }, "width": 2.5, "height": 2 },
+    { "type": "soft", "position": { "x": -3, "y": -11 }, "width": 2, "height": 2 },
+    { "type": "soft", "position": { "x": 3, "y": 11 }, "width": 2, "height": 2 },
+    { "type": "soft", "position": { "x": -14, "y": -3 }, "width": 2, "height": 1.5 }
+  ],
+  "powerUps": [
+    { "type": "double_damage", "position": { "x": -8, "y": -3 } },
+    { "type": "knockback", "position": { "x": 8, "y": 3 } },
+    { "type": "piercing", "position": { "x": 0, "y": -5 } },
+    { "type": "extra_move", "position": { "x": 0, "y": 9 } },
+    { "type": "shield", "position": { "x": -12, "y": 10 } },
+    { "type": "double_damage", "position": { "x": 12, "y": -10 } }
+  ],
+  "tags": ["fun", "chaotic"]
+}

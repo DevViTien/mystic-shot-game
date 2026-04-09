@@ -6,4 +6,6 @@ export { ThemeToggle, useTheme } from './ThemeToggle';
 export { HudHeader } from './HudHeader';
 export { ControlFooter } from './ControlFooter';
 export { GameOverOverlay } from './GameOverOverlay';
+export { SkinPicker } from './SkinPicker';
+export { MapPicker } from './MapPicker';
 export { useGameEngine } from './useGameEngine';

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IconSun, IconMoon } from '../common/icons';
 import { useLocalStorage } from '../common/hooks';
+import { Tooltip } from '../common/components';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useTheme() {
@@ -30,15 +31,18 @@ interface ThemeToggleProps {
 export function ThemeToggle({ theme, onToggle, className = '' }: ThemeToggleProps) {
   const { t } = useTranslation();
   return (
-    <button
-      onClick={onToggle}
-      className={`w-8 h-8 flex items-center justify-center rounded-full bg-surface border border-border text-base cursor-pointer hover:opacity-80 transition-opacity duration-150 ${className}`}
-      title={t('theme.toggleTitle', {
+    <Tooltip
+      content={t('theme.toggleTitle', {
         mode: theme === 'dark' ? t('theme.light') : t('theme.dark'),
       })}
-      aria-label={t('theme.toggleAriaLabel')}
     >
-      {theme === 'dark' ? <IconSun size={16} /> : <IconMoon size={16} />}
-    </button>
+      <button
+        onClick={onToggle}
+        className={`w-8 h-8 flex items-center justify-center rounded-full bg-surface border border-border text-base cursor-pointer hover:opacity-80 transition-opacity duration-150 ${className}`}
+        aria-label={t('theme.toggleAriaLabel')}
+      >
+        {theme === 'dark' ? <IconSun size={16} /> : <IconMoon size={16} />}
+      </button>
+    </Tooltip>
   );
 }

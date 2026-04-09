@@ -1,0 +1,24 @@
+{
+  "id": "mirror",
+  "nameKey": "map.mirror.name",
+  "descriptionKey": "map.mirror.description",
+  "player1Spawn": { "x": -18, "y": 0 },
+  "player2Spawn": { "x": 18, "y": 0 },
+  "obstacles": [
+    { "type": "hard", "position": { "x": -9, "y": 7 }, "width": 2, "height": 2.5 },
+    { "type": "hard", "position": { "x": 9, "y": 7 }, "width": 2, "height": 2.5 },
+    { "type": "soft", "position": { "x": -9, "y": -7 }, "width": 2, "height": 2.5 },
+    { "type": "soft", "position": { "x": 9, "y": -7 }, "width": 2, "height": 2.5 },
+    { "type": "hard", "position": { "x": -3, "y": 0 }, "width": 1.5, "height": 3 },
+    { "type": "hard", "position": { "x": 3, "y": 0 }, "width": 1.5, "height": 3 }
+  ],
+  "powerUps": [
+    { "type": "double_damage", "position": { "x": -5, "y": 4 } },
+    { "type": "double_damage", "position": { "x": 5, "y": 4 } },
+    { "type": "shield", "position": { "x": -13, "y": -9 } },
+    { "type": "shield", "position": { "x": 13, "y": -9 } },
+    { "type": "extra_move", "position": { "x": -5, "y": -4 } },
+    { "type": "extra_move", "position": { "x": 5, "y": -4 } }
+  ],
+  "tags": ["competitive", "fair"]
+}

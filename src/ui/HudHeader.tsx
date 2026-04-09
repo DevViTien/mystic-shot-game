@@ -10,8 +10,18 @@ import {
 } from '../common/icons';
 import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { PowerUpType } from '../config';
+import { Tooltip } from '../common/components';
+import { Difficulty, PowerUpType } from '../config';
 import type { GameStateSnapshot, ActiveBuff } from '../core';
+
+const DIFFICULTY_STYLE: Record<Difficulty, string> = {
+  [Difficulty.Easy]:
+    'border-emerald-500/50 text-emerald-400 bg-emerald-500/10 shadow-[0_0_6px_rgba(16,185,129,0.2)]',
+  [Difficulty.Medium]:
+    'border-amber-500/50 text-amber-400 bg-amber-500/10 shadow-[0_0_6px_rgba(245,158,11,0.2)]',
+  [Difficulty.Hard]:
+    'border-red-500/50 text-red-400 bg-red-500/10 shadow-[0_0_6px_rgba(239,68,68,0.2)]',
+};
 
 interface HudHeaderProps {
   snapshot: GameStateSnapshot;
@@ -22,61 +32,121 @@ interface HudHeaderProps {
 
 export function HudHeader({ snapshot, timer, theme, onToggleTheme }: HudHeaderProps) {
   const { t } = useTranslation();
+  const isP1Turn = snapshot.currentPlayerId === 1;
+  const currentPlayer = snapshot.players[snapshot.currentPlayerId - 1];
 
   return (
-    <header className="flex items-center justify-between px-4 py-2 bg-surface border-b border-border">
-      <div
-        className={`flex items-center gap-2${snapshot.currentPlayerId === 1 ? ' bg-white/5 dark:bg-white/5 rounded-md px-2.5 py-1 outline-2 outline-offset-2 outline-accent animate-pulse-glow' : ''}`}
-      >
-        <span className="font-semibold text-sm text-accent">{snapshot.players[0].name}</span>
-        {snapshot.currentPlayerId === 1 && (
-          <span className="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-accent text-black animate-pulse-glow">
-            {t('hud.yourTurn')}
-          </span>
-        )}
-        <div className="w-30 h-3 bg-border rounded-full overflow-hidden">
-          <div
-            className="h-full bg-accent rounded-full transition-[width] duration-300"
-            style={{ width: `${snapshot.players[0].hp}%` }}
-          />
+    <header className="bg-surface border-b border-border">
+      {/* Row 1: Difficulty + Turn indicator + Settings */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center px-4 py-1 border-b border-border/50">
+        {/* Left: difficulty badge */}
+        <div className="justify-self-start">
+          <Tooltip content={t(`menu.difficultyTooltip.${snapshot.difficulty}`)}>
+            <span
+              className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${DIFFICULTY_STYLE[snapshot.difficulty]}`}
+            >
+              {t(`hud.difficulty.${snapshot.difficulty}`)}
+            </span>
+          </Tooltip>
         </div>
-        <span className="text-xs min-w-12 flex items-center gap-0.5">
-          <IconHeart size={10} /> {t('hud.hp', { hp: snapshot.players[0].hp })}
-        </span>
-        <BuffBadges buffs={snapshot.players[0].buffs} />
-      </div>
 
-      <div className="flex items-center gap-2">
+        {/* Center: active turn indicator */}
         <div
-          className={`text-2xl font-bold tabular-nums flex items-center gap-1${timer <= 10 ? ' text-danger' : ' text-text-primary'}`}
+          className={`flex items-center gap-2 px-3 py-0.5 rounded-full ${isP1Turn ? 'bg-accent/10' : 'bg-danger/10'}`}
         >
-          <IconClock size={18} /> {t('hud.timer', { seconds: timer })}
+          <span
+            className={`w-2 h-2 rounded-full animate-pulse-glow ${isP1Turn ? 'bg-accent' : 'bg-danger'}`}
+          />
+          <span
+            className={`text-xs font-semibold ${isP1Turn ? 'text-accent' : 'text-danger'}`}
+          >
+            {t('footer.playerTurn', { name: currentPlayer?.name })}
+          </span>
         </div>
-        <LanguageSwitcher />
-        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+
+        {/* Right: settings */}
+        <div className="flex items-center gap-1.5 justify-self-end">
+          <LanguageSwitcher />
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+        </div>
       </div>
 
-      <div
-        className={`flex items-center gap-2${snapshot.currentPlayerId === 2 ? ' bg-white/5 dark:bg-white/5 rounded-md px-2.5 py-1 outline-2 outline-offset-2 outline-danger animate-pulse-glow' : ''}`}
-      >
-        <BuffBadges buffs={snapshot.players[1].buffs} />
-        {snapshot.currentPlayerId === 2 && (
-          <span className="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-danger text-white animate-pulse-glow">
-            {t('hud.yourTurn')}
-          </span>
-        )}
-        <span className="font-semibold text-sm text-danger">{snapshot.players[1].name}</span>
-        <div className="w-30 h-3 bg-border rounded-full overflow-hidden">
-          <div
-            className="h-full bg-danger rounded-full transition-[width] duration-300"
-            style={{ width: `${snapshot.players[1].hp}%` }}
+      {/* Row 2: Player panels + Timer */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center px-4 py-1.5">
+        {/* P1 panel */}
+        <div className="justify-self-start">
+          <PlayerPanel
+            player={snapshot.players[0]}
+            color="accent"
+            align="left"
+            active={isP1Turn}
           />
         </div>
-        <span className="text-xs min-w-12 flex items-center gap-0.5">
-          <IconHeart size={10} /> {t('hud.hp', { hp: snapshot.players[1].hp })}
-        </span>
+
+        {/* Timer — center focal point */}
+        <div
+          className={`text-2xl font-bold tabular-nums flex items-center gap-1.5 px-4${timer <= 10 ? ' text-danger animate-pulse' : ' text-text-primary'}`}
+        >
+          <IconClock size={18} />
+          {t('hud.timer', { seconds: timer })}
+        </div>
+
+        {/* P2 panel */}
+        <div className="justify-self-end">
+          <PlayerPanel
+            player={snapshot.players[1]}
+            color="danger"
+            align="right"
+            active={!isP1Turn}
+          />
+        </div>
       </div>
     </header>
+  );
+}
+
+/* ── Player Panel ── */
+
+interface PlayerPanelProps {
+  player: GameStateSnapshot['players'][0];
+  color: 'accent' | 'danger';
+  align: 'left' | 'right';
+  active?: boolean;
+}
+
+const PLAYER_COLOR_CLASSES = {
+  accent: { text: 'text-accent', bg: 'bg-accent', outline: 'outline-accent' },
+  danger: { text: 'text-danger', bg: 'bg-danger', outline: 'outline-danger' },
+};
+
+function PlayerPanel({ player, color, align, active }: PlayerPanelProps) {
+  const { t } = useTranslation();
+  const isRight = align === 'right';
+  const c = PLAYER_COLOR_CLASSES[color];
+
+  return (
+    <div
+      className={`flex items-center gap-2.5 rounded-md px-2.5 py-1 transition-all duration-1000 ${isRight ? 'flex-row-reverse' : ''}${active ? ` bg-white/5 outline-2 outline-offset-2 ${c.outline} animate-pulse-glow` : ''}`}
+    >
+      {/* Name */}
+      <span className={`font-semibold text-sm ${c.text}`}>{player.name}</span>
+
+      {/* HP bar + text */}
+      <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
+        <div className="w-36 h-2.5 bg-border rounded-full overflow-hidden">
+          <div
+            className={`h-full ${c.bg} rounded-full transition-[width] duration-1000 ${isRight ? 'ml-auto' : ''}`}
+            style={{ width: `${player.hp}%` }}
+          />
+        </div>
+        <span className="text-[11px] text-text-muted flex items-center gap-0.5 tabular-nums">
+          <IconHeart size={10} /> {t('hud.hp', { hp: player.hp })}
+        </span>
+      </div>
+
+      {/* Buff badges */}
+      <BuffBadges buffs={player.buffs} />
+    </div>
   );
 }
 
@@ -106,14 +176,15 @@ function BuffBadges({ buffs }: { buffs: ActiveBuff[] }) {
         const Icon = BUFF_ICON_MAP[buff.type];
         const label = t(BUFF_I18N_KEY[buff.type]);
         return (
-          <span
+          <Tooltip
             key={`${buff.type}-${i}`}
-            title={`${label}${buff.remainingTurns > 0 ? ` (${buff.remainingTurns})` : ''}`}
-            className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-yellow-500/20 text-yellow-400 text-[10px] font-medium"
+            content={`${label}${buff.remainingTurns > 0 ? ` (${buff.remainingTurns})` : ''}`}
           >
-            <Icon size={10} />
-            {buff.remainingTurns > 0 && <span>{buff.remainingTurns}</span>}
-          </span>
+            <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded bg-yellow-500/20 text-yellow-400 text-[10px] font-medium">
+              <Icon size={10} />
+              {buff.remainingTurns > 0 && <span>{buff.remainingTurns}</span>}
+            </span>
+          </Tooltip>
         );
       })}
     </div>
