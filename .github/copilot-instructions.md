@@ -4,7 +4,7 @@
 
 Game artillery theo lượt trên hệ tọa độ 2D. Người chơi nhập **hàm toán học f(x)** để di chuyển và bắn đạn — đạn bay theo đồ thị hàm số.
 
-**Trạng thái**: Phase 1 hoàn chỉnh ✅ | Phase 2a (Skins) hoàn chỉnh ✅ | Phase 2c (Preset Maps) hoàn chỉnh ✅ | Phase 2b (Online) chưa triển khai
+**Trạng thái**: Phase 1 hoàn chỉnh ✅ | Phase 2a (Skins) hoàn chỉnh ✅ | Phase 2b (Online Multiplayer) hoàn chỉnh ✅ | Phase 2c (Preset Maps) hoàn chỉnh ✅
 
 ## Kiến Trúc
 
@@ -16,16 +16,21 @@ Hệ thống **hai lớp** (Hybrid):
 | **Game/Canvas** | Phaser 3.80 | Render lưới tọa độ, người chơi, đạn, vật cản |
 | **Logic** | TypeScript thuần | GameState, TurnManager, CollisionSystem |
 | **Toán học** | math.js 13 | Parse & evaluate biểu thức an toàn (sandbox) |
+| **Network** | Firebase 12 (RTDB) | Online multiplayer: auth, rooms, commands, presence |
 | **Styling** | Tailwind CSS 4 | Utility-first CSS, theme tokens via `@theme` directive |
-| **Icons** | lucide-react | Icon library (React) + canvas-icons (Phaser) |
+| **Icons** | lucide-react | Icon library (React) — barrel re-export với prefix `Icon*` |
+| **Tooltip** | @radix-ui/react-tooltip | Accessible tooltip primitives (React) |
 | **i18n** | i18next + react-i18next | Đa ngôn ngữ (EN/VI), localStorage persistence |
 | **Hooks** | usehooks-ts | Common hooks (useLocalStorage, useDebounceValue, ...) |
 | **Carousel** | Embla Carousel 8.6 | Slider component cho SkinPicker, MapPicker |
+| **Animation** | tailwindcss-animate | CSS animation utilities (fade-in, slide-in, zoom) |
 | **Linting** | ESLint 9 (flat config) | typescript-eslint, react-hooks, react-refresh |
 | **Formatting** | Prettier | Single quotes, trailing commas, 100 char width |
 | **Build** | Vite 6 | Dev server HMR, bundling, `@tailwindcss/vite` plugin |
 
 **Giao tiếp React ↔ Phaser**: Qua `GameState` (typed EventEmitter). React dispatch command → GameState emit event → Phaser lắng nghe và re-render.
+
+**Giao tiếp Online**: Qua `InputAdapter` abstraction. `LocalInputAdapter` execute trực tiếp; `FirebaseInputAdapter` push commands lên Firebase RTDB + subscribe remote commands.
 
 ## Cấu Trúc Thư Mục
 
@@ -33,29 +38,30 @@ Hệ thống **hai lớp** (Hybrid):
 src/
 ├── main.tsx           # Entry point React — mount App vào DOM, import i18n
 ├── config.ts          # Hằng số & enum toàn cục (xem chi tiết bên dưới)
-├── styles.css         # Tailwind CSS import, @theme tokens (dark/light), @layer base
+├── styles.css         # Tailwind CSS import, @theme tokens (dark/light), @layer base,
+│                      #   tailwindcss-animate plugin, custom animations (pulse-glow, tooltip-fade-in)
 │
 ├── assets/            # ═══ Static assets (bundled bởi Vite) ═══
 │   └── image/
-│       └── logo.png          # Game logo (hiển thị ở MenuScreen)
+│       └── logo.png          # Game logo (hiển thị ở MainMenu, MenuScreen)
 │
 ├── common/            # ═══ Shared utilities (không phụ thuộc domain) ═══
 │   ├── components/
 │   │   ├── AppImage.tsx      # Base image component — resolve assets từ src/assets/image/
-│   │   │                     #   → import.meta.glob eager load, truyền name prop
-│   │   ├── Modal.tsx         # Reusable modal wrapper
+│   │   ├── Modal.tsx         # Reusable modal wrapper (Escape close, backdrop click, focus trap)
 │   │   ├── Slider.tsx        # Embla Carousel slider — dùng cho SkinPicker, MapPicker
-│   │   └── index.ts          # Barrel export
+│   │   ├── tooltip/
+│   │   │   ├── TooltipPrimitive.tsx  # Radix UI tooltip wrapper (Portal, animation classes)
+│   │   │   ├── Tooltip.tsx           # Simple Tooltip component (content, placement)
+│   │   │   └── index.ts
+│   │   └── index.ts          # Barrel export (AppImage, Modal, Slider, Tooltip)
 │   ├── icons/
-│   │   ├── index.ts          # Barrel re-export lucide-react icons với prefix Icon*
-│   │   │                     #   → Theme: IconSun, IconMoon
-│   │   │                     #   → HUD: IconHeart, IconClock, IconTrophy, IconBack
-│   │   │                     #   → Actions: IconFire, IconMove, IconPlay, IconChevronLeft/Right/Up/Down
-│   │   │                     #   → Guide: IconTarget, IconHowItWorks, IconActions, IconPowerUp, ...
-│   │   │                     #   → Power-ups: IconDoubleDamage, IconKnockback, IconExtraMove, IconShield, IconPiercing
-│   │   └── canvas-icons.ts   # Phaser CanvasTexture cho power-up icons (SVG paths → Canvas 2D)
-│   │                         #   → registerPowerUpIcons(scene) — gọi trong GameScene.create()
-│   │                         #   → getPowerUpIconKey(type) — trả texture key
+│   │   └── index.ts          # Barrel re-export lucide-react icons với prefix Icon*
+│   │                         #   → Theme: IconSun, IconMoon
+│   │                         #   → HUD: IconHeart, IconClock, IconTrophy, IconBack, IconLeave
+│   │                         #   → Actions: IconFire, IconMove, IconPlay, IconChevronLeft/Right/Up/Down
+│   │                         #   → Guide: IconTarget, IconHowItWorks, IconActions, IconPowerUp, ...
+│   │                         #   → Power-ups: IconDoubleDamage, IconKnockback, IconExtraMove, IconShield, IconPiercing
 │   └── hooks/
 │       └── index.ts          # Barrel re-export từ usehooks-ts:
 │                             #   → Storage: useLocalStorage, useSessionStorage
@@ -68,42 +74,64 @@ src/
 │   │                         #   → Storage key: 'mystic-shot-lang'
 │   │                         #   → Default: 'en', fallback: 'en'
 │   └── locales/
-│       ├── en.json           # English translations (~130+ keys)
-│       └── vi.json           # Vietnamese translations (~130+ keys)
+│       ├── en.json           # English translations (~190+ keys)
+│       └── vi.json           # Vietnamese translations (~190+ keys)
 │                             #   → Cấu trúc: menu.*, hud.*, footer.*, button.*, guide.*,
-│                             #              tooltip.*, skin.*, map.{arena,fortress,...}.*
+│                             #              tooltip.*, skin.*, map.{arena,fortress,...}.*,
+│                             #              mainMenu.*, lobby.*, waiting.*
 │
 ├── core/              # ═══ Logic nền tảng (không phụ thuộc Phaser/React) ═══
 │   ├── EventEmitter.ts       # Typed pub/sub — generic EventMap, type-safe on/off/emit
 │   │                         #   → Subclass cung cấp concrete EventMap (GameEventMap, TurnEventMap)
 │   ├── GameState.ts          # Quản lý toàn bộ state game (players, obstacles, buffs, phase)
 │   │                         #   → Types: Position, PlayerState (bao gồm skinId), ActiveBuff,
-│   │                         #            ObstacleState, PowerUpState, GameStateSnapshot
+│   │                         #            ObstacleState, PowerUpState, GameStateSnapshot, PreviewData
 │   │                         #   → Interface: GameEventMap — typed event signatures
 │   │                         #   → Enum: GameEvent (StateChanged, PlayerHit, PlayerMoved,
 │   │                         #       TurnChanged, PhaseChanged, ObstacleDestroyed,
 │   │                         #       PowerUpCollected, GameOver, FireComplete,
-│   │                         #       FireAnimationDone, GameStarted)
+│   │                         #       FireAnimationDone, PreviewUpdate)
+│   │                         #   → FireComplete payload: { trajectory, playerId, collectedPowerUps }
 │   │                         #   → Batching: beginBatch()/endBatch() — gom nhiều mutation
 │   │                         #       thành 1 lần emit StateChanged (nestable)
 │   │                         #   → endGameByTimeout() — hết giờ → đối thủ thắng
-│   │                         #   → Emit GameEvent.StateChanged sau mỗi mutation (hoặc cuối batch)
 │   ├── TurnManager.ts        # Timer 60s/lượt, chuyển pha (Idle→Move→Fire→Resolve)
 │   │                         #   → Enum: TurnEvent (TimerTick, TimerExpired, PhaseChanged)
-│   │                         #   → Interface: TurnEventMap — typed event signatures
-│   │                         #   → pauseTimer()/resumeTimer() cho animation
-│   │                         #   → resetTimer() cho bonus shot khi nhặt power-up
+│   │                         #   → pauseTimer()/resumeTimer()/resetTimer() cho animation flow
 │   │                         #   → Hết giờ → gọi endGameByTimeout() (đối thủ thắng)
 │   ├── CollisionSystem.ts    # Trace quỹ đạo đạn (Δx=0.05), xử lý va chạm theo priority
 │   │                         #   → Hỗ trợ direction (1/-1): bắn theo hướng player chọn
 │   │                         #   → Interface: CollisionResult (hit, targetId, collectedPowerUps,
 │   │                         #       destroyedObstacles, finalPosition, trajectoryPoints)
-│   ├── CommandQueue.ts       # Queue lệnh tuần tự + lịch sử (cho multiplayer replay)
+│   ├── CommandQueue.ts       # Queue lệnh tuần tự + lịch sử
 │   │                         #   → Interface: Command, SerializableCommand
 │   ├── Commands.ts           # MoveCommand (di chuyển theo arc length), FireCommand (bắn + collision)
-│   │                         #   → FireCommand: nhận direction param, batch mutations, emit FireComplete
+│   │                         #   → FireCommand: batch mutations, emit FireComplete kèm collectedPowerUps
 │   │                         #   → MoveCommand: di chuyển dọc đồ thị, giới hạn arc length = 5
-│   │                         #   → Interface: FireResult
+│   │                         #   → serialize() → SerializableCommand (dùng cho online sync)
+│   └── index.ts              # Barrel export
+│
+├── network/           # ═══ Online Multiplayer (Phase 2b) ═══
+│   ├── firebase.ts           # Firebase SDK init (lazy), anonymous auth
+│   │                         #   → Config từ env vars: VITE_FIREBASE_*
+│   │                         #   → isFirebaseConfigured() — check apiKey + databaseURL
+│   │                         #   → signInAnon(), getCurrentUserId(), getDb()
+│   ├── InputAdapter.ts       # Interface: submitMove, submitFire, onCommand, isMyTurn, dispose
+│   ├── LocalInputAdapter.ts  # Local play: execute Commands trực tiếp trên GameState
+│   ├── FirebaseInputAdapter.ts # Online play: execute locally + push to Firebase
+│   │                         #   → Dedup bằng Firebase push key (processedCommandIds)
+│   │                         #   → Validate turn (playerId = currentPlayerId) trước khi execute remote
+│   │                         #   → Host writes state backup sau mỗi command
+│   ├── RoomManager.ts        # CRUD room trên Firebase RTDB
+│   │                         #   → Types: RoomMeta, PlayerInfo, RoomState
+│   │                         #   → createRoom() → 6-char code, hostId, status='waiting'
+│   │                         #   → joinRoom(code) → validate status + color conflict
+│   │                         #   → onMetaChange(), onCommand() (skip existing children on subscribe)
+│   │                         #   → pushCommand() → returns push key cho dedup
+│   │                         #   → startGame(), finishGame(), leaveRoom()
+│   ├── PresenceManager.ts    # Track online/offline via onDisconnect
+│   │                         #   → register(): onDisconnect trước set (race-safe)
+│   │                         #   → onOpponentPresence(): subscribe opponent online status
 │   └── index.ts              # Barrel export
 │
 ├── entities/          # ═══ Phaser game objects (render layer) ═══
@@ -122,9 +150,9 @@ src/
 │
 ├── skins/             # ═══ Skin System (Phase 2a) ═══
 │   ├── types.ts              # Interfaces: SkinSet, PlayerSkin, TrailSkin, PowerUpSkin
-│   │                         #   → PlayerSkin: shape, color, glow, pulse, scale
+│   │                         #   → PlayerSkin: shape, glowEffect, pulseAnimation
 │   │                         #   → TrailSkin: style, widthMultiplier, fadeSpeed, particleEmitter
-│   │                         #   → PowerUpSkin: theme, bgColors
+│   │                         #   → PowerUpSkin: theme
 │   ├── SkinRegistry.ts       # Singleton registry: get(id), getAll(), getDefault()
 │   │                         #   → 5 skins: classic, neon, geometric, starlight, pixel
 │   ├── presets/
@@ -155,12 +183,13 @@ src/
 │   └── index.ts              # Barrel export
 │
 ├── scenes/            # ═══ Phaser scenes (vòng đời game) ═══
-│   ├── MenuScene.ts          # Blank idle — React MenuScreen overlay thay thế hoàn toàn
+│   ├── MenuScene.ts          # Blank idle — React overlay thay thế hoàn toàn
 │   ├── GameScene.ts          # Scene gameplay chính:
 │   │                         #   → Load skin từ registry, register themed power-up icons
 │   │                         #   → Render lưới tọa độ, trục X/Y (grid + axes)
 │   │                         #   → Tạo entity từ GameState snapshot, truyền skin config
-│   │                         #   → Subscribe StateChanged + FireComplete để re-render
+│   │                         #   → Subscribe StateChanged + FireComplete + PreviewUpdate
+│   │                         #   → Preview system: dashed line hiển thị quỹ đạo dự kiến
 │   │                         #   → Helper: worldToScreen() (module-level function)
 │   │                         #   → Tooltip system: interactive zones cho players, obstacles, power-ups
 │   │                         #       hover hiển thị thông tin (i18n tooltip.* keys)
@@ -176,34 +205,48 @@ src/
 │   │                         #   → Medium: + sin/cos/tan/log/sqrt/abs
 │   │                         #   → Hard: bắt buộc ≥1 hàm đặc biệt
 │   │                         #   → Interface: ValidationResult { valid, error? }
-│   ├── GraphRenderer.ts      # Sinh mảng điểm (sampling) từ evaluator → dữ liệu cho vẽ quỹ đạo
+│   ├── GraphRenderer.ts      # Sinh mảng điểm (sampling) từ evaluator → dữ liệu cho preview trajectory
 │   └── index.ts
 │
 ├── ui/                # ═══ React components (DOM layer) ═══
-│   ├── App.tsx               # Root component — orchestrator mỏng, delegate logic sang useGameEngine
-│   │                         #   → Render: MenuScreen | (HudHeader + PhaserGame + ControlFooter) | GameOverOverlay
-│   │                         #   → useTheme() hook
+│   ├── App.tsx               # Root component — screen-based state machine
+│   │                         #   → Screens: mainMenu | localMenu | lobby | waiting | game | gameOver
+│   │                         #   → Delegate logic sang useGameEngine hook
 │   ├── useGameEngine.ts      # Custom hook — quản lý toàn bộ game lifecycle:
 │   │                         #   → Khởi tạo GameState, TurnManager, CollisionSystem (useMemo)
-│   │                         #   → Subscribe events: StateChanged, TimerTick, GameOver, FireAnimationDone
-│   │                         #   → Handlers: handleMove, handleFire, handleMenuStart, handleBackToMenu
-│   │                         #   → State: snapshot, timer, gameStarted, gameOver, winnerId, animating
-│   │                         #   → Pause timer khi animating, resume/endTurn khi animation done
-│   │                         #   → handleMenuStart: nhận skin IDs + map ID, truyền vào GameState + Phaser registry
-│   ├── HudHeader.tsx         # Header bar: HP bars (2 players), timer countdown, buffs icons,
-│   │                         #   active turn indicator (glow + badge), ThemeToggle, LanguageSwitcher
-│   │                         #   → BuffBadges sub-component: hiển thị power-up icons + remaining turns
-│   ├── ControlFooter.tsx     # Footer bar (h-10 cố định): turn info, FormulaInput, direction toggle,
-│   │                         #   Move button, Fire button
-│   │                         #   → Direction: single toggle button (nhấn đổi ◀/▶)
-│   │                         #   → Reset canFire + expression khi turnNumber thay đổi
-│   ├── GameOverOverlay.tsx   # Overlay khi game kết thúc: trophy icon, "[Name] Wins!", nút BACK TO MENU
-│   │                         #   → Nhận winnerId prop (không suy từ HP nữa)
-│   ├── MenuScreen.tsx        # Menu trước game: logo, nhập tên, chọn màu (6 colors, mutual exclusion),
+│   │                         #   → AppScreen state machine (mainMenu→localMenu/lobby→waiting→game→gameOver)
+│   │                         #   → Subscribe events: StateChanged, TimerTick, GameOver,
+│   │                         #       FireAnimationDone, FireComplete (timer pause + pending action)
+│   │                         #   → Separate GameOver effect (depends on onlineMode/isHost)
+│   │                         #   → Local handlers: handleMove, handleFire, handlePreview, handleMenuStart
+│   │                         #   → Online handlers: handleCreateRoom, handleJoinRoom, handleOnlineStart,
+│   │                         #       handleCancelRoom, handleLeaveGame
+│   │                         #   → InputAdapter pattern: LocalInputAdapter / FirebaseInputAdapter
+│   │                         #   → Guest init: watch roomMeta.status='playing' → load host snapshot
+│   │                         #       (guarded by guestInitialized ref to prevent re-init)
+│   ├── MainMenu.tsx          # Màn hình chính: Local Play / Online Play buttons
+│   │                         #   → isFirebaseConfigured() check → disable Online nếu không config
+│   ├── MenuScreen.tsx        # Menu local play: nhập tên × 2, chọn màu (6 colors, mutual exclusion),
 │   │                         #   SkinPicker (mỗi player), MapPicker, difficulty,
-│   │                         #   How to Play guide (collapsible), ThemeToggle + LanguageSwitcher
-│   │                         #   → Interface: MenuResult { player1, player2, difficulty, mapId? }
-│   │                         #   → player1/player2 bao gồm: name, color, skinId
+│   │                         #   How to Play guide (Modal), ThemeToggle + LanguageSwitcher
+│   │                         #   → onBack prop (optional) — quay về MainMenu
+│   │                         #   → Interface: MenuResult { player1, player2, difficulty, mapId }
+│   ├── LobbyScreen.tsx       # Online lobby: profile (name, color, skin persisted localStorage),
+│   │                         #   create room (difficulty + map) hoặc join room (6-char code)
+│   │                         #   → Interface: CreateRoomConfig, JoinRoomConfig
+│   │                         #   → Error display, loading state
+│   ├── WaitingRoom.tsx       # Waiting room: room code display + copy, player cards (host vs guest),
+│   │                         #   game settings, host Start button (disabled until guest joins)
+│   ├── HudHeader.tsx         # Header bar: HP bars (2 players), timer countdown, buffs icons,
+│   │                         #   active turn indicator (glow + badge), ThemeToggle, LanguageSwitcher,
+│   │                         #   leave/forfeit button, opponent disconnect indicator
+│   │                         #   → Props: onlineMode, opponentOnline, onLeave
+│   │                         #   → BuffBadges sub-component: hiển thị power-up icons + remaining turns
+│   ├── ControlFooter.tsx     # Footer bar: turn info, FormulaInput, direction toggle (auto-face opponent),
+│   │                         #   Move button, Fire button, preview trigger
+│   │                         #   → disabled prop: animating || (onlineMode && !isMyTurn)
+│   ├── GameOverOverlay.tsx   # Overlay khi game kết thúc: trophy icon, "[Name] Wins!", nút BACK TO MENU
+│   │                         #   → Nhận winnerId prop
 │   ├── SkinPicker.tsx        # Carousel slider chọn skin — mini preview (shape + trail)
 │   │                         #   → Dùng Slider component (Embla Carousel)
 │   ├── MapPicker.tsx         # Carousel slider chọn map — mini preview canvas
@@ -220,26 +263,25 @@ src/
 │   └── index.ts              # Barrel export tất cả components + hooks
 │
 └── utils/             # ═══ Helpers dùng chung ═══
-    ├── MapGenerator.ts       # Sinh map ngẫu nhiên: 3-6 vật cản + 2-4 power-up,
-    │                         #   tránh overlap (min 50 attempts), spawn players ở 2 bên
+    ├── MapGenerator.ts       # Sinh map ngẫu nhiên: 5-10 vật cản + 3-6 power-up,
+    │                         #   tránh overlap (max 80 attempts), spawn players ở 2 bên
     │                         #   → fromPreset(): load preset map thay vì random
     ├── MathUtils.ts          # distance(), clamp(), lerp()
     └── index.ts
 ```
 
-**Lưu ý**: Thư mục `input/` (InputAdapter, LocalInputAdapter) **chưa được implement**. Input handling hiện tại được xử lý trực tiếp qua callbacks trong `useGameEngine.ts`. Thiết kế input abstraction dành cho multiplayer tương lai (Phase 2b).
-
 ### Hằng Số Quan Trọng (`config.ts`)
 
 | Nhóm | Giá trị | Ý nghĩa |
 |------|---------|---------|
-| `MAP` | X[-20,20] Y[-15,15], WIDTH=40, HEIGHT=30 | Phạm vi hệ tọa độ game |
+| `MAP` | X[-25,25] Y[-18,18], WIDTH=50, HEIGHT=36 | Phạm vi hệ tọa độ game |
 | `PLAYER` | HP=100, DMG=25, hitbox=0.5, moves=2, arcLength=5, moveStep=0.05 | Thông số người chơi |
 | `TURN` | 60s, warning=10s | Thời gian mỗi lượt |
 | `PROJECTILE` | step=0.05 | Bước lấy mẫu quỹ đạo |
-| `OBSTACLES` | min=3, max=6 | Số lượng vật cản |
-| `POWERUPS` | min=2, max=4, doubleDmgMultiplier=2, knockbackDist=2 | Số lượng & thông số power-up |
-| `PHASER_CONFIG` | 960×720, BG=0x1a1a2e, Grid=0x333355, Axis=0x6666aa, P1=0x00ccff, P2=0xff4466 | Canvas + màu sắc |
+| `PREVIEW` | step=0.1, opacity=0.5, dash=[6,4] | Preview trajectory settings |
+| `OBSTACLES` | min=5, max=10 | Số lượng vật cản (random) |
+| `POWERUPS` | min=3, max=6, doubleDmgMultiplier=2, knockbackDist=2 | Số lượng & thông số power-up |
+| `PHASER_CONFIG` | 1200×864, BG=0x1a1a2e, Grid=0x333355, Axis=0x6666aa, P1=0x00ccff, P2=0xff4466 | Canvas + màu sắc |
 
 ### Enum (`config.ts`)
 
@@ -264,15 +306,24 @@ core/ (GameState, EventEmitter, TurnManager, CollisionSystem, Commands)
 skins/ (types, registry,   maps/ (types, storage,
   presets, renderers)         presets, validator)
     ↓                           ↓
-ui/App.tsx                 scenes/GameScene.ts
-├── useGameEngine.ts           ├── entities/ (Player, Obstacle, PowerUp, Projectile)
-│   (lifecycle hook)           │   → delegate rendering sang skins/renderers/
-├── HudHeader.tsx              ├── common/icons/canvas-icons (power-up textures)
-├── ControlFooter.tsx          ├── skins/renderers/ (themed power-up icons)
-├── GameOverOverlay.tsx        ├── tooltip system (interactive zones + i18n)
-├── MenuScreen.tsx             └── subscribe GameState events
+network/ (InputAdapter,   scenes/GameScene.ts
+  LocalInputAdapter,          ├── entities/ (Player, Obstacle, PowerUp, Projectile)
+  FirebaseInputAdapter,       │   → delegate rendering sang skins/renderers/
+  RoomManager,                ├── skins/renderers/ (themed power-up icons)
+  PresenceManager)            ├── tooltip system (interactive zones + i18n)
+    ↓                         └── subscribe GameState events
+ui/App.tsx
+├── useGameEngine.ts
+│   (lifecycle hook + InputAdapter orchestration)
+├── MainMenu.tsx
+├── MenuScreen.tsx
 │   ├── SkinPicker.tsx
 │   └── MapPicker.tsx
+├── LobbyScreen.tsx
+├── WaitingRoom.tsx
+├── HudHeader.tsx
+├── ControlFooter.tsx
+├── GameOverOverlay.tsx
 ├── PhaserGame.tsx
 ├── FormulaInput.tsx
 ├── ThemeToggle.tsx
@@ -310,12 +361,13 @@ npm run format:check # Prettier check (CI-friendly)
 - React và Phaser subscribe độc lập
 
 ### Command Pattern
-- Mọi hành động (move, fire) là một `Command` (serializable cho multiplayer tương lai)
+- Mọi hành động (move, fire) là một `Command` (serializable cho multiplayer)
 - `CommandQueue` quản lý thứ tự thực thi
 - `FireCommand` sử dụng batch để gom damage + powerup + obstacle mutations
+- `serialize()` → `SerializableCommand` — dùng cho online sync qua Firebase
 
 ### Animation Flow
-- `FireCommand.execute()` → emit `FireComplete` (trajectory data)
+- `FireCommand.execute()` → emit `FireComplete` (trajectory + collectedPowerUps)
 - GameScene nhận trajectory → tạo `Projectile` → animate (sử dụng TrailStyleRenderer theo skin)
 - Khi animation xong → emit `FireAnimationDone`
 - `useGameEngine` nhận `FireAnimationDone` → resume timer hoặc endTurn
@@ -341,7 +393,7 @@ npm run format:check # Prettier check (CI-friendly)
 ## Lưu Ý Quan Trọng
 
 ### Hệ Tọa Độ
-- **Game coords** (toán): gốc ở giữa, y hướng lên, phạm vi X[-20,20] Y[-15,15]
+- **Game coords** (toán): gốc ở giữa, y hướng lên, phạm vi X[-25,25] Y[-18,18]
 - **Screen coords** (Phaser): gốc top-left, y hướng xuống
 - Dùng helper `worldToScreen()` trong GameScene (module-level function)
 
@@ -403,8 +455,27 @@ npm run format:check # Prettier check (CI-friendly)
 ### Bảo Mật
 - math.js chạy sandbox — **không dùng eval()** cho biểu thức người dùng
 - Validate input trước khi parse
+- Firebase anonymous auth — không yêu cầu đăng nhập
+- Firebase config qua env vars (`VITE_FIREBASE_*`) — không hardcode
+
+### Online Multiplayer (Phase 2b)
+- **InputAdapter pattern**: `LocalInputAdapter` cho local play, `FirebaseInputAdapter` cho online
+- **Room lifecycle**: createRoom → joinRoom → startGame → finishGame → leaveRoom
+- **Room code**: 6-char alphanumeric (loại trừ I/O/0/1 tránh nhầm lẫn)
+- **Command sync**: Player execute locally + push `SerializableCommand` lên Firebase RTDB
+- **Dedup**: Dùng Firebase push key (unique) để tránh execute command trùng
+- **Turn validation**: Remote commands bị reject nếu `playerId ≠ currentPlayerId`
+- **Presence**: `onDisconnect()` registered trước `set()` (race-safe), opponent online status subscribe
+- **Guest init**: Watch `roomMeta.status='playing'` → load host snapshot (guarded by `guestInitialized` ref)
+- **Screen flow**: MainMenu → LobbyScreen (create/join) → WaitingRoom → Game → GameOver
 
 ## Tài Liệu Tham Khảo
 
-- Thiết kế game chi tiết (Phase 1): xem `docs/[design] game-design-document.md`
-- Thiết kế Phase 2: xem `docs/[design] phase-2-features.md`
+- Tổng quan thiết kế: xem `docs/design/overview.md`
+- Phase 1 — Core Game: xem `docs/design/phase-1.md`
+- Phase 2 — Extensions: xem `docs/design/phase-2.md`
+- Gameplay mechanics: xem `docs/design/gameplay.md`
+- UI & Menus: xem `docs/design/ui-and-menus.md`
+- Skin System: xem `docs/design/skin-system.md`
+- Online Multiplayer: xem `docs/design/online-multiplayer.md`
+- Preset Maps: xem `docs/design/preset-maps.md`

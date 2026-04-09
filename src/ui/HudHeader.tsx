@@ -12,6 +12,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { Tooltip } from '../common/components';
 import { Difficulty, PowerUpType } from '../config';
+import { IconLeave } from '../common/icons';
 import type { GameStateSnapshot, ActiveBuff } from '../core';
 
 const DIFFICULTY_STYLE: Record<Difficulty, string> = {
@@ -28,9 +29,12 @@ interface HudHeaderProps {
   timer: number;
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
+  onlineMode?: boolean;
+  opponentOnline?: boolean;
+  onLeave?: () => void;
 }
 
-export function HudHeader({ snapshot, timer, theme, onToggleTheme }: HudHeaderProps) {
+export function HudHeader({ snapshot, timer, theme, onToggleTheme, onlineMode, opponentOnline, onLeave }: HudHeaderProps) {
   const { t } = useTranslation();
   const isP1Turn = snapshot.currentPlayerId === 1;
   const currentPlayer = snapshot.players[snapshot.currentPlayerId - 1];
@@ -66,8 +70,21 @@ export function HudHeader({ snapshot, timer, theme, onToggleTheme }: HudHeaderPr
 
         {/* Right: settings */}
         <div className="flex items-center gap-1.5 justify-self-end">
+          {onlineMode && opponentOnline === false && (
+            <span className="text-[10px] text-danger font-semibold animate-pulse mr-1">
+              {t('hud.opponentDisconnected')}
+            </span>
+          )}
           <LanguageSwitcher />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          <Tooltip content={onlineMode ? t('hud.forfeit') : t('hud.leaveGame')}>
+            <button
+              className="w-7 h-7 rounded flex items-center justify-center cursor-pointer border-none bg-danger/10 text-danger hover:bg-danger/20 transition-colors duration-150"
+              onClick={onLeave}
+            >
+              <IconLeave size={14} />
+            </button>
+          </Tooltip>
         </div>
       </div>
 

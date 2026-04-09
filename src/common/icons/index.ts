@@ -17,6 +17,7 @@ export { Heart as IconHeart } from 'lucide-react';
 export { Clock as IconClock } from 'lucide-react';
 export { Trophy as IconTrophy } from 'lucide-react';
 export { ArrowLeft as IconBack } from 'lucide-react';
+export { LogOut as IconLeave } from 'lucide-react';
 export { Sparkles as IconBuff } from 'lucide-react';
 
 // ---------- Directional ----------

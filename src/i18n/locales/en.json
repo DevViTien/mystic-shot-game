@@ -71,6 +71,9 @@
     "yourTurn": "YOUR TURN",
     "hp": "{{hp}} HP",
     "timer": "{{seconds}}s",
+    "opponentDisconnected": "Opponent disconnected",
+    "leaveGame": "Leave game",
+    "forfeit": "Forfeit",
     "difficulty": {
       "easy": "Easy",
       "medium": "Medium",
@@ -86,6 +89,7 @@
     "fire": "Fire",
     "dirLeftTitle": "Direction: left (-x)",
     "dirRightTitle": "Direction: right (+x)",
+    "back": "Back",
     "backToMenu": "BACK TO MENU"
   },
   "game": {
@@ -155,5 +159,34 @@
       "hard": "Hard Obstacle\nBlocks all projectiles",
       "soft": "Soft Obstacle\nDestroyed on hit"
     }
+  },
+  "mainMenu": {
+    "localPlay": "LOCAL PLAY",
+    "onlinePlay": "ONLINE PLAY",
+    "onlineNotConfigured": "Online play requires Firebase configuration"
+  },
+  "lobby": {
+    "title": "ONLINE — MYSTIC SHOT",
+    "yourProfile": "Your Profile",
+    "createRoom": "Create Room",
+    "joinRoom": "Join Room",
+    "enterCode": "Enter room code",
+    "create": "CREATE",
+    "join": "JOIN",
+    "or": "OR",
+    "back": "Back to Menu"
+  },
+  "waiting": {
+    "title": "Waiting Room",
+    "roomCode": "Room Code",
+    "copy": "COPY",
+    "copied": "COPIED!",
+    "host": "Host",
+    "guest": "Guest",
+    "waitingForGuest": "Waiting for opponent...",
+    "waitingForHost": "Waiting for host to start...",
+    "connecting": "Connecting...",
+    "cancel": "Cancel",
+    "startGame": "START GAME"
   }
 }

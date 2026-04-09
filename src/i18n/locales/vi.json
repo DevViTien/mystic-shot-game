@@ -71,6 +71,9 @@
     "yourTurn": "LƯỢT CỦA BẠN",
     "hp": "{{hp}} HP",
     "timer": "{{seconds}}s",
+    "opponentDisconnected": "Đối thủ mất kết nối",
+    "leaveGame": "Rời trận",
+    "forfeit": "Đầu hàng",
     "difficulty": {
       "easy": "Dễ",
       "medium": "Trung bình",
@@ -86,6 +89,7 @@
     "fire": "Bắn",
     "dirLeftTitle": "Hướng: trái (-x)",
     "dirRightTitle": "Hướng: phải (+x)",
+    "back": "Quay lại",
     "backToMenu": "VỀ MENU"
   },
   "game": {
@@ -155,5 +159,34 @@
       "hard": "Vật Cản Cứng\nChặn mọi đạn",
       "soft": "Vật Cản Mềm\nBị phá khi trúng đạn"
     }
+  },
+  "mainMenu": {
+    "localPlay": "CHƠI TẠI MÁY",
+    "onlinePlay": "CHƠI ONLINE",
+    "onlineNotConfigured": "Chơi online cần cấu hình Firebase"
+  },
+  "lobby": {
+    "title": "ONLINE — MYSTIC SHOT",
+    "yourProfile": "Hồ sơ của bạn",
+    "createRoom": "Tạo phòng",
+    "joinRoom": "Vào phòng",
+    "enterCode": "Nhập mã phòng",
+    "create": "TẠO",
+    "join": "VÀO",
+    "or": "HOẶC",
+    "back": "Quay lại"
+  },
+  "waiting": {
+    "title": "Phòng chờ",
+    "roomCode": "Mã phòng",
+    "copy": "SAO CHÉP",
+    "copied": "ĐÃ SAO CHÉP!",
+    "host": "Chủ phòng",
+    "guest": "Khách",
+    "waitingForGuest": "Đang chờ đối thủ...",
+    "waitingForHost": "Đang chờ chủ phòng bắt đầu...",
+    "connecting": "Đang kết nối...",
+    "cancel": "Hủy",
+    "startGame": "BẮT ĐẦU"
   }
 }

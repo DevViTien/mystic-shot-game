@@ -21,6 +21,7 @@ import {
   IconShield,
   IconPiercing,
   IconGuide,
+  IconBack,
 } from '../common/icons';
 
 export interface PlayerConfig {
@@ -47,11 +48,12 @@ const COLOR_OPTIONS = [
 
 interface MenuScreenProps {
   onStart: (config: MenuResult) => void;
+  onBack?: () => void;
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
 }
 
-export function MenuScreen({ onStart, theme, onToggleTheme }: MenuScreenProps) {
+export function MenuScreen({ onStart, onBack, theme, onToggleTheme }: MenuScreenProps) {
   const { t } = useTranslation();
   const [p1Name, setP1Name] = useState(t('menu.player1'));
   const [p2Name, setP2Name] = useState(t('menu.player2'));
@@ -172,12 +174,22 @@ export function MenuScreen({ onStart, theme, onToggleTheme }: MenuScreenProps) {
           {t('menu.startGame')}
         </button>
 
-        <button
-          className="bg-transparent text-text-muted text-[13px] px-3 py-1 border border-border-input rounded cursor-pointer hover:text-text-primary hover:border-text-muted transition-colors duration-150 flex items-center gap-1"
-          onClick={() => setShowGuide(true)}
-        >
-          <IconGuide size={14} /> <span>{t('menu.showGuide')}</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button
+              className="bg-transparent text-text-muted text-[13px] px-3 py-1 border border-border-input rounded cursor-pointer hover:text-text-primary hover:border-text-muted transition-colors duration-150 flex items-center gap-1"
+              onClick={onBack}
+            >
+              <IconBack size={14} /> {t('button.back')}
+            </button>
+          )}
+          <button
+            className="bg-transparent text-text-muted text-[13px] px-3 py-1 border border-border-input rounded cursor-pointer hover:text-text-primary hover:border-text-muted transition-colors duration-150 flex items-center gap-1"
+            onClick={() => setShowGuide(true)}
+          >
+            <IconGuide size={14} /> <span>{t('menu.showGuide')}</span>
+          </button>
+        </div>
 
         <Modal open={showGuide} onClose={() => setShowGuide(false)} title={t('menu.showGuide')}>
           <div className="flex flex-col gap-4 text-left">

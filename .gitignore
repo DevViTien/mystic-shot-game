@@ -2,5 +2,8 @@
 node_modules/
 dist/
 
+# environment variables
+.env
+
 # AI generated files
 reports/
