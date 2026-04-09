@@ -161,6 +161,7 @@ export class FireCommand implements Command {
     this.gameState.emit(GameEvent.FireComplete, {
       trajectory: this.result.trajectoryPoints,
       playerId: this.playerId,
+      collectedPowerUps: this.result.collectedPowerUps,
     });
   }
 

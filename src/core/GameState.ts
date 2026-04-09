@@ -72,7 +72,7 @@ export interface GameEventMap {
   [GameEvent.ObstacleDestroyed]: [{ obstacleId: string }];
   [GameEvent.PowerUpCollected]: [{ playerId: 1 | 2; powerUp: PowerUpState }];
   [GameEvent.GameOver]: [{ winnerId: 1 | 2 }];
-  [GameEvent.FireComplete]: [{ trajectory: Position[]; playerId: 1 | 2 }];
+  [GameEvent.FireComplete]: [{ trajectory: Position[]; playerId: 1 | 2; collectedPowerUps: string[] }];
   [GameEvent.FireAnimationDone]: [];
   [GameEvent.PreviewUpdate]: [PreviewData | null];
 }

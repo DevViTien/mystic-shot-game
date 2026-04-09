@@ -16,6 +16,7 @@
   "dependencies": {
     "@radix-ui/react-tooltip": "^1.2.8",
     "embla-carousel-react": "^8.6.0",
+    "firebase": "^12.11.0",
     "i18next": "^26.0.3",
     "katex": "^0.16.0",
     "lucide-react": "^1.7.0",

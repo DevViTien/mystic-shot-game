@@ -74,6 +74,7 @@ export function ControlFooter({ snapshot, onMove, onFire, onPreview, disabled }:
               });
             }}
             canMove={!!canMove && canFire && !disabled}
+            disabled={disabled}
             onChange={(expr, valid) => {
               expressionRef.current = expr;
               setCanFire(valid && expr.trim() !== '');
@@ -92,7 +93,8 @@ export function ControlFooter({ snapshot, onMove, onFire, onPreview, disabled }:
           {/* Direction toggle */}
           <Tooltip content={`${direction === 1 ? t('button.dirRightTitle') : t('button.dirLeftTitle')} [Tab]`}>
             <button
-              className="w-8 h-10 rounded cursor-pointer border-none flex flex-col items-center justify-center transition-all duration-150 bg-accent/20 text-accent ring-1 ring-accent/40 hover:bg-accent/30"
+              className="w-8 h-10 rounded cursor-pointer border-none flex flex-col items-center justify-center transition-all duration-150 bg-accent/20 text-accent ring-1 ring-accent/40 hover:bg-accent/30 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-accent/20"
+              disabled={disabled}
               onClick={() => {
                 setDirection((d) => {
                   const next = d === 1 ? -1 : 1;
