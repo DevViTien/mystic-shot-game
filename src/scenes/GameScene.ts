@@ -1,7 +1,13 @@
 import Phaser from 'phaser';
 import i18next from 'i18next';
 import { MAP, PLAYER, PHASER_CONFIG } from '../config';
-import { GameState, GameEvent, type GameStateSnapshot, type Position, type PreviewData } from '../core';
+import {
+  GameState,
+  GameEvent,
+  type GameStateSnapshot,
+  type Position,
+  type PreviewData,
+} from '../core';
 import { Player } from '../entities/Player';
 import { Obstacle } from '../entities/Obstacle';
 import { PowerUp } from '../entities/PowerUp';

@@ -33,6 +33,8 @@
     "*.lock": true
   },
   "chat.tools.terminal.autoApprove": {
-    "npx vitest": true
+    "npx vitest": true,
+    "npx vite": true,
+    "npx tsc": true
   }
 }

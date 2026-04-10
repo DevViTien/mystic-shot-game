@@ -1,11 +1,7 @@
 import type { Position } from '../core';
 import { PowerUpType } from '../config';
 import type { PowerUpTheme } from '../skins';
-import {
-  getThemedPowerUpIconKey,
-  getThemeBgColor,
-  getThemeBgAlpha,
-} from '../skins';
+import { getThemedPowerUpIconKey, getThemeBgColor, getThemeBgAlpha } from '../skins';
 
 /**
  * Power-up entity — rendered as an icon on the Phaser canvas.

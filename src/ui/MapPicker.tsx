@@ -31,9 +31,7 @@ export function MapPicker({ mapId, onChange }: MapPickerProps) {
 
   return (
     <div className="flex flex-col items-center gap-2 w-full">
-      <span className="text-xs text-text-muted uppercase tracking-wider">
-        {t('menu.map')}
-      </span>
+      <span className="text-xs text-text-muted uppercase tracking-wider">{t('menu.map')}</span>
       <Slider
         items={MAP_OPTIONS}
         selectedIndex={selectedIndex}

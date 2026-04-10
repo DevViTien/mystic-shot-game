@@ -103,7 +103,7 @@ export function App() {
 
       <main
         style={{ display: screen === 'game' || screen === 'replay' ? 'flex' : 'none' }}
-        className="flex-1 flex items-center justify-center overflow-x-auto overflow-y-hidden min-h-0 py-2"
+        className="flex-1 flex items-center justify-center overflow-x-auto overflow-y-hidden min-h-0 py-1 md:py-2"
       >
         <PhaserGame ref={phaserRef} gameState={gameState} />
       </main>

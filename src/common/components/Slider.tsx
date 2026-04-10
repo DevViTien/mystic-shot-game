@@ -78,9 +78,7 @@ export function Slider<T>({
         </button>
       </div>
 
-      {showDots && (
-        <DotIndicator total={items.length} active={selectedIndex} />
-      )}
+      {showDots && <DotIndicator total={items.length} active={selectedIndex} />}
     </div>
   );
 }

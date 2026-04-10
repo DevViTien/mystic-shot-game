@@ -20,7 +20,12 @@ export class Projectile {
   constructor(
     private trajectory: Position[],
     private color: number,
-    private skin: TrailSkin = { style: 'solid', particleEmitter: false, widthMultiplier: 1.0, fadeSpeed: 1.0 },
+    private skin: TrailSkin = {
+      style: 'solid',
+      particleEmitter: false,
+      widthMultiplier: 1.0,
+      fadeSpeed: 1.0,
+    },
   ) {}
 
   create(scene: Phaser.Scene): void {

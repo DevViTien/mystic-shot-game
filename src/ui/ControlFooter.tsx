@@ -14,7 +14,13 @@ interface ControlFooterProps {
   disabled?: boolean;
 }
 
-export function ControlFooter({ snapshot, onMove, onFire, onPreview, disabled }: ControlFooterProps) {
+export function ControlFooter({
+  snapshot,
+  onMove,
+  onFire,
+  onPreview,
+  disabled,
+}: ControlFooterProps) {
   const { t } = useTranslation();
   const expressionRef = useRef('');
   const [canFire, setCanFire] = useState(false);
@@ -28,9 +34,9 @@ export function ControlFooter({ snapshot, onMove, onFire, onPreview, disabled }:
   useEffect(() => {
     expressionRef.current = '';
     setCanFire(false);
-    setDirection(currentPlayer && opponent
-      ? (currentPlayer.position.x <= opponent.position.x ? 1 : -1)
-      : 1);
+    setDirection(
+      currentPlayer && opponent ? (currentPlayer.position.x <= opponent.position.x ? 1 : -1) : 1,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot.turnNumber]);
   const canMove =
@@ -39,10 +45,10 @@ export function ControlFooter({ snapshot, onMove, onFire, onPreview, disabled }:
   const playerColor = snapshot.currentPlayerId === 1 ? 'text-accent' : 'text-danger';
 
   return (
-    <footer className="px-4 h-20 bg-surface border-t border-border flex items-center">
-      <div className="flex items-center gap-3 w-full">
-        {/* Left: turn info */}
-        <div className="flex flex-col justify-center gap-0.5 min-w-[120px]">
+    <footer className="px-2 md:px-4 py-2 md:py-0 md:h-20 bg-surface border-t border-border flex items-center">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 md:gap-3 w-full">
+        {/* Turn info — hidden on mobile, shown on desktop left */}
+        <div className="hidden md:flex flex-col justify-center gap-0.5 min-w-[120px]">
           <span className={`font-semibold text-sm flex items-center gap-1 ${playerColor}`}>
             <IconPlay size={12} /> {t('footer.playerTurn', { name: currentPlayer?.name })}
           </span>
@@ -51,7 +57,7 @@ export function ControlFooter({ snapshot, onMove, onFire, onPreview, disabled }:
           </span>
         </div>
 
-        {/* Center: formula input (expands) */}
+        {/* Row 1 on mobile / Center on desktop: formula input */}
         <div className="flex-1 min-w-0">
           <FormulaInput
             key={snapshot.turnNumber}
@@ -88,60 +94,77 @@ export function ControlFooter({ snapshot, onMove, onFire, onPreview, disabled }:
           />
         </div>
 
-        {/* Right: controls group */}
-        <div className="flex items-center gap-2">
-          {/* Direction toggle */}
-          <Tooltip content={`${direction === 1 ? t('button.dirRightTitle') : t('button.dirLeftTitle')} [Tab]`}>
-            <button
-              className="w-8 h-10 rounded cursor-pointer border-none flex flex-col items-center justify-center transition-all duration-150 bg-accent/20 text-accent ring-1 ring-accent/40 hover:bg-accent/30 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-accent/20"
-              disabled={disabled}
-              onClick={() => {
-                setDirection((d) => {
-                  const next = d === 1 ? -1 : 1;
-                  if (expressionRef.current.trim() && canFire) {
-                    onPreview?.(expressionRef.current, next, 'fire');
-                  }
-                  return next;
-                });
-              }}
-            >
-              {direction === 1 ? <IconChevronRight size={18} /> : <IconChevronLeft size={18} />}
-              <span className="text-[8px] text-accent/60 leading-none hidden [@media(hover:hover)]:block">Tab</span>
-            </button>
-          </Tooltip>
+        {/* Row 2 on mobile / Right on desktop: move info + controls */}
+        <div className="flex items-center gap-2 justify-between md:justify-end">
+          {/* Mobile-only: move count badge */}
+          <span className="md:hidden text-[11px] text-text-muted">
+            {t('footer.movesLeft', { count: currentPlayer?.moveCharges ?? 0 })}
+          </span>
 
-          {/* Divider */}
-          <div className="w-px h-10 bg-border" />
-
-          {/* Move button */}
-          <Tooltip content={`${t('button.move')} (${currentPlayer?.moveCharges ?? 0}) [Shift+Enter]`}>
-            <button
-              className="w-10 h-10 rounded-lg cursor-pointer border-none bg-warning/90 text-black flex flex-col items-center justify-center transition-all duration-150 hover:bg-warning hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
-              disabled={!canMove || !canFire || disabled}
-              onClick={() => {
-                onPreview?.('', direction, 'move');
-                onMove(expressionRef.current, direction);
-              }}
+          <div className="flex items-center gap-2">
+            {/* Direction toggle */}
+            <Tooltip
+              content={`${direction === 1 ? t('button.dirRightTitle') : t('button.dirLeftTitle')} [Tab]`}
             >
-              <IconMove size={16} />
-              <span className="text-[7px] text-black/50 leading-none hidden [@media(hover:hover)]:block">⇧↵</span>
-            </button>
-          </Tooltip>
+              <button
+                className="w-10 h-10 md:w-8 md:h-10 rounded cursor-pointer border-none flex flex-col items-center justify-center transition-all duration-150 bg-accent/20 text-accent ring-1 ring-accent/40 hover:bg-accent/30 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-accent/20"
+                disabled={disabled}
+                onClick={() => {
+                  setDirection((d) => {
+                    const next = d === 1 ? -1 : 1;
+                    if (expressionRef.current.trim() && canFire) {
+                      onPreview?.(expressionRef.current, next, 'fire');
+                    }
+                    return next;
+                  });
+                }}
+              >
+                {direction === 1 ? <IconChevronRight size={18} /> : <IconChevronLeft size={18} />}
+                <span className="text-[8px] text-accent/60 leading-none hidden [@media(hover:hover)]:block">
+                  Tab
+                </span>
+              </button>
+            </Tooltip>
 
-          {/* Fire button */}
-          <Tooltip content={`${t('button.fire')} [Enter]`}>
-            <button
-              className="w-10 h-10 rounded-lg cursor-pointer border-none bg-danger/90 text-white flex flex-col items-center justify-center transition-all duration-150 hover:bg-danger hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
-              disabled={!canFire || disabled}
-              onClick={() => {
-                onPreview?.('', direction, 'fire');
-                onFire(expressionRef.current, direction);
-              }}
+            {/* Divider */}
+            <div className="w-px h-10 bg-border" />
+
+            {/* Move button */}
+            <Tooltip
+              content={`${t('button.move')} (${currentPlayer?.moveCharges ?? 0}) [Shift+Enter]`}
             >
-              <IconFire size={16} />
-              <span className="text-[7px] text-white/50 leading-none hidden [@media(hover:hover)]:block">↵</span>
-            </button>
-          </Tooltip>
+              <button
+                className="w-11 h-11 md:w-10 md:h-10 rounded-lg cursor-pointer border-none bg-warning/90 text-black flex flex-col items-center justify-center transition-all duration-150 hover:bg-warning hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                disabled={!canMove || !canFire || disabled}
+                onClick={() => {
+                  onPreview?.('', direction, 'move');
+                  onMove(expressionRef.current, direction);
+                }}
+              >
+                <IconMove size={16} />
+                <span className="text-[7px] text-black/50 leading-none hidden [@media(hover:hover)]:block">
+                  ⇧↵
+                </span>
+              </button>
+            </Tooltip>
+
+            {/* Fire button */}
+            <Tooltip content={`${t('button.fire')} [Enter]`}>
+              <button
+                className="w-11 h-11 md:w-10 md:h-10 rounded-lg cursor-pointer border-none bg-danger/90 text-white flex flex-col items-center justify-center transition-all duration-150 hover:bg-danger hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
+                disabled={!canFire || disabled}
+                onClick={() => {
+                  onPreview?.('', direction, 'fire');
+                  onFire(expressionRef.current, direction);
+                }}
+              >
+                <IconFire size={16} />
+                <span className="text-[7px] text-white/50 leading-none hidden [@media(hover:hover)]:block">
+                  ↵
+                </span>
+              </button>
+            </Tooltip>
+          </div>
         </div>
       </div>
     </footer>

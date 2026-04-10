@@ -248,7 +248,7 @@ describe('GameState', () => {
       gs.destroyObstacle('obs1');
 
       const snap = gs.getSnapshot();
-      expect(snap.obstacles[0].destroyed).toBe(true);
+      expect(snap.obstacles[0]?.destroyed).toBe(true);
     });
   });
 

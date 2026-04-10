@@ -75,19 +75,25 @@ export function MenuScreen({ onStart, onBack, theme, onToggleTheme }: MenuScreen
   };
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-overlay">
-      <div className="bg-surface border border-border rounded-xl px-6 py-5 max-w-[720px] max-h-[90vh] overflow-y-auto w-full flex flex-col items-center gap-6 relative">
-        <div className="absolute top-4 right-4 flex items-center gap-1.5">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-overlay p-3 md:p-4">
+      <div className="bg-surface border border-border rounded-xl px-4 py-4 md:px-6 md:py-5 max-w-[720px] max-h-[90vh] overflow-y-auto w-full flex flex-col items-center gap-4 md:gap-6 relative">
+        <div className="absolute top-3 right-3 md:top-4 md:right-4 flex items-center gap-1.5">
           <LanguageSwitcher />
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         </div>
-        <AppImage name="logo.png" alt="Mystic Shot" className="w-24 h-24 rounded-xl" />
-        <h1 className="text-4xl font-extrabold text-accent font-mono tracking-[4px] -mt-4">
+        <AppImage
+          name="logo.png"
+          alt="Mystic Shot"
+          className="w-16 h-16 md:w-24 md:h-24 rounded-xl"
+        />
+        <h1 className="text-2xl md:text-4xl font-extrabold text-accent font-mono tracking-[3px] md:tracking-[4px] -mt-2 md:-mt-4">
           {t('menu.title')}
         </h1>
-        <p className="text-[13px] text-text-muted -mt-4">{t('menu.subtitle')}</p>
+        <p className="text-[12px] md:text-[13px] text-text-muted -mt-2 md:-mt-4">
+          {t('menu.subtitle')}
+        </p>
 
-        <div className="flex items-start gap-6 w-full">
+        <div className="flex flex-col md:flex-row items-stretch md:items-start gap-4 md:gap-6 w-full">
           {/* Player 1 */}
           <div className="flex-1 flex flex-col items-center gap-2.5">
             <h2 className="text-base font-bold" style={{ color: p1Color }}>
@@ -101,11 +107,11 @@ export function MenuScreen({ onStart, onBack, theme, onToggleTheme }: MenuScreen
               placeholder={t('menu.playerNamePlaceholder')}
               maxLength={16}
             />
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               {COLOR_OPTIONS.map((c) => (
                 <button
                   key={c.value}
-                  className={`w-7 h-7 rounded-full border-2 cursor-pointer transition-transform duration-100 ${p1Color === c.value ? 'border-white scale-120' : 'border-transparent'} ${p2Color === c.value ? 'opacity-25 cursor-not-allowed' : 'hover:scale-115'}`}
+                  className={`w-9 h-9 md:w-7 md:h-7 rounded-full border-2 cursor-pointer transition-transform duration-100 ${p1Color === c.value ? 'border-white scale-120' : 'border-transparent'} ${p2Color === c.value ? 'opacity-25 cursor-not-allowed' : 'hover:scale-115'}`}
                   style={{ background: c.value }}
                   onClick={() => p2Color !== c.value && setP1Color(c.value)}
                   title={t(c.labelKey)}
@@ -116,7 +122,10 @@ export function MenuScreen({ onStart, onBack, theme, onToggleTheme }: MenuScreen
             <SkinPicker skinId={p1Skin} onChange={setP1Skin} color={p1Color} />
           </div>
 
-          <div className="text-2xl font-extrabold text-text-muted pt-9">{t('menu.versus')}</div>
+          <div className="hidden md:block text-2xl font-extrabold text-text-muted pt-9">
+            {t('menu.versus')}
+          </div>
+          <div className="md:hidden w-full h-px bg-border" />
 
           {/* Player 2 */}
           <div className="flex-1 flex flex-col items-center gap-2.5">
@@ -131,11 +140,11 @@ export function MenuScreen({ onStart, onBack, theme, onToggleTheme }: MenuScreen
               placeholder={t('menu.playerNamePlaceholder')}
               maxLength={16}
             />
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               {COLOR_OPTIONS.map((c) => (
                 <button
                   key={c.value}
-                  className={`w-7 h-7 rounded-full border-2 cursor-pointer transition-transform duration-100 ${p2Color === c.value ? 'border-white scale-120' : 'border-transparent'} ${p1Color === c.value ? 'opacity-25 cursor-not-allowed' : 'hover:scale-115'}`}
+                  className={`w-9 h-9 md:w-7 md:h-7 rounded-full border-2 cursor-pointer transition-transform duration-100 ${p2Color === c.value ? 'border-white scale-120' : 'border-transparent'} ${p1Color === c.value ? 'opacity-25 cursor-not-allowed' : 'hover:scale-115'}`}
                   style={{ background: c.value }}
                   onClick={() => p1Color !== c.value && setP2Color(c.value)}
                   title={t(c.labelKey)}
@@ -168,7 +177,7 @@ export function MenuScreen({ onStart, onBack, theme, onToggleTheme }: MenuScreen
         <MapPicker mapId={mapId} onChange={setMapId} />
 
         <button
-          className="mt-2 px-12 py-3 text-lg font-bold tracking-[2px] rounded-md bg-accent text-black cursor-pointer border-none hover:opacity-85 transition-opacity duration-150"
+          className="mt-2 px-8 md:px-12 py-3 text-base md:text-lg font-bold tracking-[2px] rounded-md bg-accent text-black cursor-pointer border-none hover:opacity-85 transition-opacity duration-150 w-full md:w-auto max-w-[320px] min-h-[44px]"
           onClick={handleStart}
         >
           {t('menu.startGame')}

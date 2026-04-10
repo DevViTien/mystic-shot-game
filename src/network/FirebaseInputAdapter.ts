@@ -1,11 +1,6 @@
 import type { InputAdapter } from './InputAdapter';
 import type { SerializableCommand } from '../core/CommandQueue';
-import {
-  GameState,
-  MoveCommand,
-  FireCommand,
-  CollisionSystem,
-} from '../core';
+import { GameState, MoveCommand, FireCommand, CollisionSystem } from '../core';
 import { RoomManager } from './RoomManager';
 import { getCurrentUserId } from './firebase';
 

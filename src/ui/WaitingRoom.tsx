@@ -21,13 +21,15 @@ export function WaitingRoom({ meta, isHost, onStart, onCancel }: WaitingRoomProp
       await navigator.clipboard.writeText(meta.roomCode);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-overlay">
-      <div className="bg-surface border border-border rounded-xl px-10 py-8 max-w-[520px] w-full flex flex-col items-center gap-5">
-        <h2 className="text-xl font-extrabold text-accent font-mono tracking-[3px]">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-overlay p-3 md:p-4">
+      <div className="bg-surface border border-border rounded-xl px-5 py-5 md:px-10 md:py-8 max-w-[520px] w-full flex flex-col items-center gap-4 md:gap-5">
+        <h2 className="text-lg md:text-xl font-extrabold text-accent font-mono tracking-[2px] md:tracking-[3px]">
           {t('waiting.title')}
         </h2>
 
@@ -36,12 +38,12 @@ export function WaitingRoom({ meta, isHost, onStart, onCancel }: WaitingRoomProp
           <span className="text-xs text-text-muted uppercase tracking-wider">
             {t('waiting.roomCode')}
           </span>
-          <div className="flex items-center gap-3">
-            <span className="text-3xl font-mono font-bold text-text-primary tracking-[8px]">
+          <div className="flex items-center gap-2 md:gap-3">
+            <span className="text-2xl md:text-3xl font-mono font-bold text-text-primary tracking-[4px] md:tracking-[8px]">
               {meta.roomCode}
             </span>
             <button
-              className="px-3 py-1 text-xs font-semibold rounded bg-surface-alt text-text-muted hover:text-text-primary cursor-pointer border-none transition-colors"
+              className="px-3 py-1.5 text-xs font-semibold rounded bg-surface-alt text-text-muted hover:text-text-primary cursor-pointer border-none transition-colors min-h-[36px]"
               onClick={copyCode}
             >
               {copied ? t('waiting.copied') : t('waiting.copy')}
@@ -73,9 +75,7 @@ export function WaitingRoom({ meta, isHost, onStart, onCancel }: WaitingRoomProp
                   className="w-8 h-8 rounded-full border-2 border-white"
                   style={{ background: meta.guest.color }}
                 />
-                <span className="text-sm font-semibold text-text-primary">
-                  {meta.guest.name}
-                </span>
+                <span className="text-sm font-semibold text-text-primary">{meta.guest.name}</span>
                 <span className="text-[10px] text-text-muted">{meta.guest.skinId}</span>
               </>
             ) : (
@@ -100,9 +100,9 @@ export function WaitingRoom({ meta, isHost, onStart, onCancel }: WaitingRoomProp
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 mt-2">
+        <div className="flex flex-col md:flex-row gap-2 md:gap-3 mt-2 w-full md:w-auto items-center">
           <button
-            className="px-4 py-2 text-sm rounded bg-surface-alt text-text-muted hover:text-text-primary cursor-pointer border-none transition-colors flex items-center gap-1"
+            className="px-4 py-2 text-sm rounded bg-surface-alt text-text-muted hover:text-text-primary cursor-pointer border-none transition-colors flex items-center justify-center gap-1 min-h-[44px] w-full md:w-auto"
             onClick={onCancel}
           >
             <IconBack size={14} /> {t('waiting.cancel')}
@@ -110,7 +110,7 @@ export function WaitingRoom({ meta, isHost, onStart, onCancel }: WaitingRoomProp
 
           {isHost && (
             <button
-              className="px-8 py-2 text-sm font-bold tracking-[1px] rounded-md bg-accent text-black cursor-pointer border-none hover:opacity-85 transition-opacity duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-6 md:px-8 py-2 text-sm font-bold tracking-[1px] rounded-md bg-accent text-black cursor-pointer border-none hover:opacity-85 transition-opacity duration-150 disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px] w-full md:w-auto"
               onClick={onStart}
               disabled={!guestJoined}
             >

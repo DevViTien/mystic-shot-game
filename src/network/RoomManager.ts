@@ -73,11 +73,7 @@ export class RoomManager {
   /**
    * Create a new room. Returns the room code.
    */
-  async createRoom(
-    player: PlayerInfo,
-    difficulty: Difficulty,
-    mapId: string,
-  ): Promise<string> {
+  async createRoom(player: PlayerInfo, difficulty: Difficulty, mapId: string): Promise<string> {
     const uid = getCurrentUserId();
     if (!uid) throw new Error('Not authenticated');
 

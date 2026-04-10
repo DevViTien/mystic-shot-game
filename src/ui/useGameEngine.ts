@@ -117,7 +117,9 @@ export function useGameEngine() {
         roomManager.finishGame(winnerId);
       }
     });
-    return () => { unsubGameOver(); };
+    return () => {
+      unsubGameOver();
+    };
   }, [gameState, turnManager, onlineMode, isHost, roomManager, replayRecorder]);
 
   // ── Local play handlers ──
@@ -187,10 +189,16 @@ export function useGameEngine() {
       if (mode === 'fire') {
         const startX = player.position.x;
         const endX = direction === 1 ? MAP.MAX_X : MAP.MIN_X;
-        const points = GraphRenderer.generatePoints(evalFn, Math.min(startX, endX), Math.max(startX, endX), PREVIEW.SAMPLE_STEP);
-        const filtered = direction === 1
-          ? points.filter((p) => p.x >= startX)
-          : points.filter((p) => p.x <= startX).reverse();
+        const points = GraphRenderer.generatePoints(
+          evalFn,
+          Math.min(startX, endX),
+          Math.max(startX, endX),
+          PREVIEW.SAMPLE_STEP,
+        );
+        const filtered =
+          direction === 1
+            ? points.filter((p) => p.x >= startX)
+            : points.filter((p) => p.x <= startX).reverse();
         gameState.emit(GameEvent.PreviewUpdate, { points: filtered, mode });
       } else {
         const step = PLAYER.MOVE_SAMPLE_STEP;
@@ -227,7 +235,8 @@ export function useGameEngine() {
 
   const handleMenuStart = useCallback(
     (config: MenuResult) => {
-      const preset = config.mapId && config.mapId !== 'random' ? MapStorage.get(config.mapId) : undefined;
+      const preset =
+        config.mapId && config.mapId !== 'random' ? MapStorage.get(config.mapId) : undefined;
       const map = preset ? MapGenerator.fromPreset(preset) : MapGenerator.generate();
       const startingPlayer: 1 | 2 = Math.random() < 0.5 ? 1 : 2;
       gameState.init({
@@ -349,9 +358,7 @@ export function useGameEngine() {
     if (!guestPlayer) return;
 
     const preset =
-      roomMeta.mapId && roomMeta.mapId !== 'random'
-        ? MapStorage.get(roomMeta.mapId)
-        : undefined;
+      roomMeta.mapId && roomMeta.mapId !== 'random' ? MapStorage.get(roomMeta.mapId) : undefined;
     const map = preset ? MapGenerator.fromPreset(preset) : MapGenerator.generate();
     const startingPlayer: 1 | 2 = Math.random() < 0.5 ? 1 : 2;
 
@@ -406,7 +413,15 @@ export function useGameEngine() {
     setWinnerId(null);
     setTimer(60);
     turnManager.startTurn();
-  }, [gameState, turnManager, collisionSystem, roomManager, presenceManager, roomMeta, replayRecorder]);
+  }, [
+    gameState,
+    turnManager,
+    collisionSystem,
+    roomManager,
+    presenceManager,
+    roomMeta,
+    replayRecorder,
+  ]);
 
   // Guest: watch for status='playing' → load state and start local game
   useEffect(() => {
@@ -436,7 +451,10 @@ export function useGameEngine() {
       const game = phaserRef.current?.getGame();
       if (game) {
         game.registry.set('p1Color', parseInt(roomMeta.host.color.replace('#', ''), 16));
-        game.registry.set('p2Color', parseInt((roomMeta.guest?.color || '#ff4466').replace('#', ''), 16));
+        game.registry.set(
+          'p2Color',
+          parseInt((roomMeta.guest?.color || '#ff4466').replace('#', ''), 16),
+        );
         game.registry.set('p1Skin', roomMeta.host.skinId ?? 'classic');
         game.registry.set('p2Skin', roomMeta.guest?.skinId ?? 'classic');
 
@@ -469,7 +487,17 @@ export function useGameEngine() {
     };
 
     initGuest();
-  }, [onlineMode, isHost, roomMeta, gameState, turnManager, collisionSystem, roomManager, presenceManager, replayRecorder]);
+  }, [
+    onlineMode,
+    isHost,
+    roomMeta,
+    gameState,
+    turnManager,
+    collisionSystem,
+    roomManager,
+    presenceManager,
+    replayRecorder,
+  ]);
 
   // ── Navigation ──
 

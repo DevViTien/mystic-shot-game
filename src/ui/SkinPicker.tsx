@@ -19,16 +19,11 @@ export function SkinPicker({ skinId, onChange, color }: SkinPickerProps) {
     allSkins.findIndex((s) => s.id === skinId),
   );
 
-  const handleSelect = useCallback(
-    (idx: number) => onChange(allSkins[idx]!.id),
-    [onChange],
-  );
+  const handleSelect = useCallback((idx: number) => onChange(allSkins[idx]!.id), [onChange]);
 
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <span className="text-xs text-text-muted uppercase tracking-wider">
-        {t('menu.skin')}
-      </span>
+      <span className="text-xs text-text-muted uppercase tracking-wider">{t('menu.skin')}</span>
       <Slider
         items={allSkins}
         selectedIndex={selectedIndex}
@@ -38,9 +33,7 @@ export function SkinPicker({ skinId, onChange, color }: SkinPickerProps) {
         renderSlide={(skin) => (
           <div className="flex items-center gap-2 justify-center">
             <SkinPreview skin={skin} color={color} />
-            <span className="text-sm font-medium text-text-primary">
-              {t(skin.nameKey)}
-            </span>
+            <span className="text-sm font-medium text-text-primary">{t(skin.nameKey)}</span>
           </div>
         )}
       />

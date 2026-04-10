@@ -34,7 +34,15 @@ interface HudHeaderProps {
   onLeave?: () => void;
 }
 
-export function HudHeader({ snapshot, timer, theme, onToggleTheme, onlineMode, opponentOnline, onLeave }: HudHeaderProps) {
+export function HudHeader({
+  snapshot,
+  timer,
+  theme,
+  onToggleTheme,
+  onlineMode,
+  opponentOnline,
+  onLeave,
+}: HudHeaderProps) {
   const { t } = useTranslation();
   const isP1Turn = snapshot.currentPlayerId === 1;
   const currentPlayer = snapshot.players[snapshot.currentPlayerId - 1];
@@ -42,40 +50,43 @@ export function HudHeader({ snapshot, timer, theme, onToggleTheme, onlineMode, o
   return (
     <header className="bg-surface border-b border-border">
       {/* Row 1: Difficulty + Turn indicator + Settings */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center px-4 py-1 border-b border-border/50">
+      <div className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[1fr_auto_1fr] items-center px-2 md:px-4 py-1 border-b border-border/50 gap-1 md:gap-0">
         {/* Left: difficulty badge */}
         <div className="justify-self-start">
           <Tooltip content={t(`menu.difficultyTooltip.${snapshot.difficulty}`)}>
             <span
-              className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${DIFFICULTY_STYLE[snapshot.difficulty]}`}
+              className={`text-[9px] md:text-[10px] font-bold uppercase tracking-widest px-1.5 md:px-2 py-0.5 rounded-full border ${DIFFICULTY_STYLE[snapshot.difficulty]}`}
             >
-              {t(`hud.difficulty.${snapshot.difficulty}`)}
+              <span className="hidden md:inline">{t(`hud.difficulty.${snapshot.difficulty}`)}</span>
+              <span className="md:hidden">{snapshot.difficulty.charAt(0).toUpperCase()}</span>
             </span>
           </Tooltip>
         </div>
 
         {/* Center: active turn indicator */}
         <div
-          className={`flex items-center gap-2 px-3 py-0.5 rounded-full ${isP1Turn ? 'bg-accent/10' : 'bg-danger/10'}`}
+          className={`flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-0.5 rounded-full justify-self-center ${isP1Turn ? 'bg-accent/10' : 'bg-danger/10'}`}
         >
           <span
-            className={`w-2 h-2 rounded-full animate-pulse-glow ${isP1Turn ? 'bg-accent' : 'bg-danger'}`}
+            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse-glow ${isP1Turn ? 'bg-accent' : 'bg-danger'}`}
           />
           <span
-            className={`text-xs font-semibold ${isP1Turn ? 'text-accent' : 'text-danger'}`}
+            className={`text-[10px] md:text-xs font-semibold truncate max-w-[120px] md:max-w-none ${isP1Turn ? 'text-accent' : 'text-danger'}`}
           >
             {t('footer.playerTurn', { name: currentPlayer?.name })}
           </span>
         </div>
 
         {/* Right: settings */}
-        <div className="flex items-center gap-1.5 justify-self-end">
+        <div className="flex items-center gap-1 md:gap-1.5 justify-self-end">
           {onlineMode && opponentOnline === false && (
-            <span className="text-[10px] text-danger font-semibold animate-pulse mr-1">
+            <span className="text-[9px] md:text-[10px] text-danger font-semibold animate-pulse mr-1 hidden md:inline">
               {t('hud.opponentDisconnected')}
             </span>
           )}
-          <LanguageSwitcher />
+          <span className="hidden md:inline-flex">
+            <LanguageSwitcher />
+          </span>
           <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           <Tooltip content={onlineMode ? t('hud.forfeit') : t('hud.leaveGame')}>
             <button
@@ -89,33 +100,44 @@ export function HudHeader({ snapshot, timer, theme, onToggleTheme, onlineMode, o
       </div>
 
       {/* Row 2: Player panels + Timer */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center px-4 py-1.5">
-        {/* P1 panel */}
-        <div className="justify-self-start">
-          <PlayerPanel
-            player={snapshot.players[0]}
-            color="accent"
-            align="left"
-            active={isP1Turn}
-          />
-        </div>
-
-        {/* Timer — center focal point */}
+      <div className="flex flex-col md:grid md:grid-cols-[1fr_auto_1fr] items-center px-2 md:px-4 py-1 md:py-1.5 gap-1 md:gap-0">
+        {/* Timer — on mobile, show on top */}
         <div
-          className={`text-2xl font-bold tabular-nums flex items-center gap-1.5 px-4${timer <= 10 ? ' text-danger animate-pulse' : ' text-text-primary'}`}
+          className={`md:hidden text-lg font-bold tabular-nums flex items-center gap-1 ${timer <= 10 ? ' text-danger animate-pulse' : ' text-text-primary'}`}
         >
-          <IconClock size={18} />
+          <IconClock size={14} />
           {t('hud.timer', { seconds: timer })}
         </div>
 
-        {/* P2 panel */}
-        <div className="justify-self-end">
-          <PlayerPanel
-            player={snapshot.players[1]}
-            color="danger"
-            align="right"
-            active={!isP1Turn}
-          />
+        {/* Players row on mobile: side by side compact */}
+        <div className="flex items-center justify-between w-full md:contents">
+          {/* P1 panel */}
+          <div className="md:justify-self-start">
+            <PlayerPanel
+              player={snapshot.players[0]}
+              color="accent"
+              align="left"
+              active={isP1Turn}
+            />
+          </div>
+
+          {/* Timer — desktop center */}
+          <div
+            className={`hidden md:flex text-2xl font-bold tabular-nums items-center gap-1.5 px-4${timer <= 10 ? ' text-danger animate-pulse' : ' text-text-primary'}`}
+          >
+            <IconClock size={18} />
+            {t('hud.timer', { seconds: timer })}
+          </div>
+
+          {/* P2 panel */}
+          <div className="md:justify-self-end">
+            <PlayerPanel
+              player={snapshot.players[1]}
+              color="danger"
+              align="right"
+              active={!isP1Turn}
+            />
+          </div>
         </div>
       </div>
     </header>
@@ -143,26 +165,32 @@ function PlayerPanel({ player, color, align, active }: PlayerPanelProps) {
 
   return (
     <div
-      className={`flex items-center gap-2.5 rounded-md px-2.5 py-1 transition-all duration-1000 ${isRight ? 'flex-row-reverse' : ''}${active ? ` bg-white/5 outline-2 outline-offset-2 ${c.outline} animate-pulse-glow` : ''}`}
+      className={`flex items-center gap-1.5 md:gap-2.5 rounded-md px-1.5 md:px-2.5 py-1 transition-all duration-1000 ${isRight ? 'flex-row-reverse' : ''}${active ? ` bg-white/5 outline-2 outline-offset-2 ${c.outline} animate-pulse-glow` : ''}`}
     >
       {/* Name */}
-      <span className={`font-semibold text-sm ${c.text}`}>{player.name}</span>
+      <span
+        className={`font-semibold text-xs md:text-sm truncate max-w-[60px] md:max-w-none ${c.text}`}
+      >
+        {player.name}
+      </span>
 
       {/* HP bar + text */}
-      <div className={`flex items-center gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
-        <div className="w-36 h-2.5 bg-border rounded-full overflow-hidden">
+      <div className={`flex items-center gap-1 md:gap-1.5 ${isRight ? 'flex-row-reverse' : ''}`}>
+        <div className="w-16 md:w-36 h-2 md:h-2.5 bg-border rounded-full overflow-hidden">
           <div
             className={`h-full ${c.bg} rounded-full transition-[width] duration-1000 ${isRight ? 'ml-auto' : ''}`}
             style={{ width: `${player.hp}%` }}
           />
         </div>
-        <span className="text-[11px] text-text-muted flex items-center gap-0.5 tabular-nums">
+        <span className="text-[10px] md:text-[11px] text-text-muted flex items-center gap-0.5 tabular-nums">
           <IconHeart size={10} /> {t('hud.hp', { hp: player.hp })}
         </span>
       </div>
 
-      {/* Buff badges */}
-      <BuffBadges buffs={player.buffs} />
+      {/* Buff badges — hide on very small screens */}
+      <span className="hidden md:flex">
+        <BuffBadges buffs={player.buffs} />
+      </span>
     </div>
   );
 }

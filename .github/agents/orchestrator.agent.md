@@ -109,6 +109,23 @@ Sau mỗi subagent trả về:
    - Báo user và dừng pipeline
 4. Nếu PASS → tiếp tục task tiếp theo
 
+#### 2d. Quality Gate — BẮT BUỘC sau mỗi task có thay đổi code
+
+Sau BẤT KỲ task nào tạo/sửa file `.ts` / `.tsx`, **PHẢI chạy đủ 3 lệnh theo thứ tự**:
+
+```bash
+npm run build        # TypeScript check + Vite build
+npm run test         # Vitest — tất cả tests phải pass
+npm run lint         # ESLint check
+```
+
+**Quy tắc nghiêm ngặt:**
+- Nếu `build` FAIL → sửa ngay (gọi `coder` + `/fix-bug`), KHÔNG tiếp tục task tiếp
+- Nếu `test` FAIL → sửa ngay (gọi `coder` hoặc `tester`), KHÔNG tiếp tục task tiếp
+- Nếu `lint` FAIL → chạy `npm run lint:fix`, verify lại
+- **KHÔNG BAO GIỜ skip quality gate** — kể cả khi "chỉ sửa nhỏ"
+- Mỗi lệnh fail tối đa 2 lần retry → DỪNG pipeline, báo user
+
 ### Phase 3 — Đồng bộ Design Docs
 
 Sau khi code + test pass, **BẮT BUỘC** kiểm tra và cập nhật design docs:

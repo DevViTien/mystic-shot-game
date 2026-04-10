@@ -82,31 +82,31 @@ export function LobbyScreen({
   }, [onJoinRoom, player, roomCode]);
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-overlay p-4">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-overlay p-3 md:p-4">
       <div className="bg-surface border border-border rounded-2xl max-w-[800px] max-h-[92vh] overflow-y-auto w-full flex flex-col relative shadow-2xl shadow-black/30">
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-6 pt-5 pb-3">
+        <div className="flex items-center justify-between px-3 md:px-6 pt-3 md:pt-5 pb-2 md:pb-3 gap-2">
           <button
-            className="flex items-center gap-1.5 text-text-muted text-[13px] hover:text-text-primary transition-colors duration-150 cursor-pointer bg-transparent border-none"
+            className="flex items-center gap-1 shrink-0 text-text-muted text-[12px] md:text-[13px] hover:text-text-primary transition-colors duration-150 cursor-pointer bg-transparent border-none min-h-[36px]"
             onClick={onBack}
           >
-            <IconBack size={16} /> {t('lobby.back')}
+            <IconBack size={14} /> <span className="hidden md:inline">{t('lobby.back')}</span>
           </button>
-          <h1 className="text-xl font-extrabold text-accent font-mono tracking-[3px]">
+          <h1 className="text-sm md:text-xl font-extrabold text-accent font-mono tracking-[1px] md:tracking-[3px] truncate text-center min-w-0">
             {t('lobby.title')}
           </h1>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
             <LanguageSwitcher />
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           </div>
         </div>
 
-        <div className="h-px bg-border mx-4" />
+        <div className="h-px bg-border mx-3 md:mx-4" />
 
         {/* ── Body: 2-column layout ── */}
         <div className="flex flex-col md:flex-row gap-0 md:gap-0 flex-1 min-h-0">
           {/* ── Left Column: Profile + Game Settings ── */}
-          <div className="flex-1 flex flex-col gap-5 p-6 overflow-y-auto">
+          <div className="flex-1 flex flex-col gap-4 md:gap-5 p-4 md:p-6 overflow-y-auto">
             {/* Profile */}
             <section className="flex flex-col gap-3">
               <h2 className="text-[11px] font-bold text-text-muted uppercase tracking-[2px]">
@@ -127,12 +127,12 @@ export function LobbyScreen({
                   maxLength={16}
                 />
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex gap-1.5">
+              <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+                <div className="flex gap-2 md:gap-1.5">
                   {COLOR_OPTIONS.map((c) => (
                     <button
                       key={c.value}
-                      className={`w-7 h-7 rounded-full cursor-pointer transition-all duration-150 border-2 ${
+                      className={`w-9 h-9 md:w-7 md:h-7 rounded-full cursor-pointer transition-all duration-150 border-2 ${
                         color === c.value
                           ? 'border-white scale-115 shadow-lg'
                           : 'border-transparent opacity-60 hover:opacity-100 hover:scale-110'
@@ -142,7 +142,7 @@ export function LobbyScreen({
                     />
                   ))}
                 </div>
-                <div className="w-px h-6 bg-border" />
+                <div className="hidden md:block w-px h-6 bg-border" />
                 <SkinPicker skinId={skinId} onChange={setSkinId} color={color} />
               </div>
             </section>
@@ -208,7 +208,7 @@ export function LobbyScreen({
           </div>
 
           {/* ── Right Column: Join Room ── */}
-          <div className="md:w-[240px] shrink-0 flex flex-col items-center justify-center gap-4 p-6">
+          <div className="md:w-[240px] shrink-0 flex flex-col items-center justify-center gap-3 md:gap-4 p-4 md:p-6">
             <h2 className="text-[11px] font-bold text-text-muted uppercase tracking-[2px]">
               {t('lobby.joinRoom')}
             </h2>
@@ -251,7 +251,7 @@ export function LobbyScreen({
 
         {/* ── Error ── */}
         {error && (
-          <div className="mx-6 mb-4 px-3 py-2 rounded-lg bg-danger/10 border border-danger/30 text-sm text-danger text-center">
+          <div className="mx-4 md:mx-6 mb-4 px-3 py-2 rounded-lg bg-danger/10 border border-danger/30 text-sm text-danger text-center">
             {error}
           </div>
         )}

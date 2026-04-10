@@ -118,8 +118,8 @@ export function FormulaInput({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2">
-        <label htmlFor="formula" className="text-sm font-semibold whitespace-nowrap">
+      <div className="flex items-center gap-1.5 md:gap-2">
+        <label htmlFor="formula" className="text-xs md:text-sm font-semibold whitespace-nowrap">
           {t('formula.label')}
         </label>
         <input
@@ -134,15 +134,15 @@ export function FormulaInput({
           autoComplete="off"
           spellCheck={false}
           maxLength={100}
-          className="flex-1 px-2.5 py-1 text-sm font-mono bg-surface-input text-text-primary border border-border-input rounded outline-none focus:border-accent"
+          className="flex-1 min-w-0 px-2 md:px-2.5 py-1.5 md:py-1 text-sm font-mono bg-surface-input text-text-primary border border-border-input rounded outline-none focus:border-accent"
           title={hasError ? validation.error : undefined}
         />
       </div>
       {hasError && (
-        <span className="text-xs text-danger pl-[3.25rem]">{validation.error}</span>
+        <span className="text-xs text-danger pl-0 md:pl-[3.25rem]">{validation.error}</span>
       )}
       {!hasError && debouncedExpr.trim() !== '' && (
-        <div className="text-sm pl-[3.25rem]" ref={katexRef} />
+        <div className="text-sm pl-0 md:pl-[3.25rem] overflow-x-auto" ref={katexRef} />
       )}
     </div>
   );

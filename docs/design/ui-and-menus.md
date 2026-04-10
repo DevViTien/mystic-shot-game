@@ -162,9 +162,11 @@ Guide modal giải thích: objective, mechanics, actions, power-ups, obstacles, 
 └───────────────────────────────────────────────────────────┘
 ```
 
-**Row 1**: Difficulty badge (color-coded) | Active turn indicator (glow + player name) | Language switcher + Theme toggle + Leave button
+**Row 1**: Difficulty badge (color-coded, single letter on mobile) | Active turn indicator (glow + player name, truncated on mobile) | Language switcher (hidden mobile) + Theme toggle + Leave button
 
-**Row 2**: P1 panel (name + HP bar + buff badges) | Timer (center) | P2 panel
+**Row 2 Desktop**: P1 panel (name + HP bar + buff badges) | Timer (center) | P2 panel
+
+**Row 2 Mobile**: Timer (top, compact) → P1 panel + P2 panel side-by-side (compact HP bars, hidden buff badges)
 
 ### Player Panel
 
@@ -198,11 +200,16 @@ Mỗi active buff hiển thị icon nhỏ + số lượt còn lại. Tooltip con
 └───────────────────────────────────────────────────────────────┘
 ```
 
-### Layout (flex row)
+### Layout
 
+**Desktop** (flex row):
 1. **Left**: Turn info — player name (color-coded) + moves remaining
 2. **Center** (flex-1): FormulaInput — input + validation + KaTeX
 3. **Right**: Direction toggle + Move button + Fire button
+
+**Mobile** (flex column, 2 rows):
+1. **Row 1**: FormulaInput full-width
+2. **Row 2**: Move count badge (left) + Direction toggle + Move button + Fire button (right)
 
 ### Direction toggle
 
@@ -361,3 +368,44 @@ React controls bar hiển thị khi `screen === 'replay'`, nằm bottom của vi
 - **Exit**: Gỡ registry event listeners, chuyển `screen` về `gameOver`
 - **Speed cycle**: Click nút speed → 1× → 2× → 4× → 1× (loop)
 - **Giao tiếp**: Set `replaySpeed` / `replayPaused` trên `game.registry` → ReplayScene đọc trong `update()`
+
+---
+
+## 15. Responsive Design
+
+Toàn bộ UI hỗ trợ 3 breakpoints:
+
+| Breakpoint | Kích thước | Tailwind prefix |
+|-----------|-----------|----------------|
+| Mobile | < 640px | (default) |
+| Tablet | 768–1023px | `md:` |
+| Desktop | ≥ 1280px | `xl:` (hoặc `md:` cho hầu hết) |
+
+### Nguyên tắc
+
+- **Mobile-first approach**: Style mặc định = mobile, thêm `md:` cho tablet/desktop
+- **Touch targets**: Tối thiểu 44×44px cho buttons trên mobile
+- **Không horizontal scroll** trên mobile
+- **Text readable**: Min 12px trên mobile
+
+### Responsive Strategy theo Screen
+
+| Screen | Strategy | Chi tiết |
+|--------|----------|---------|
+| MainMenu | Reflow | Giảm padding (px-6), text-2xl title, buttons full-width |
+| MenuScreen | Rearrange | P1/P2 stack dọc (flex-col) trên mobile, ẩn "VS" text thay bằng divider |
+| LobbyScreen | Reflow | Đã có `md:` breakpoints, fine-tune padding. 2-column → 1-column mobile |
+| WaitingRoom | Reflow | Giảm padding, room code tracking giảm, buttons stack dọc mobile |
+| HudHeader | Rearrange | Mobile: ẩn difficulty full text (chỉ chữ cái đầu), timer trên top, players compact. Ẩn LanguageSwitcher + buff badges trên mobile |
+| ControlFooter | Rearrange | Mobile: 2 rows — Row 1: formula input, Row 2: move count + action buttons. Ẩn turn info text |
+| FormulaInput | Reflow | Label nhỏ hơn, input full-width, KaTeX left-aligned mobile |
+| GameOverOverlay | Reflow | Giảm padding, buttons stack dọc, text nhỏ hơn |
+| ReplayOverlay | Rearrange | Mobile: 2 rows — Row 1: label + exit, Row 2: controls + progress bar full-width |
+| SkinPicker, MapPicker | OK | Đã responsive sẵn (Embla Carousel + Slider component) |
+| Modal | OK | Đã responsive sẵn (mx-4, max-h-[85vh], overflow-y-auto) |
+
+### Phaser Canvas
+
+- Scale mode: `Phaser.Scale.FIT` + `CENTER_BOTH` — tự scale theo container
+- Canvas 1200×864 sẽ thu nhỏ trên mobile (~31% trên 375px) — chấp nhận vì game cần nhìn toàn bộ map
+- Container responsive via `flex-1 min-h-0` trong App.tsx
