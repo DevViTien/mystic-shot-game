@@ -188,5 +188,15 @@
     "connecting": "Connecting...",
     "cancel": "Cancel",
     "startGame": "START GAME"
+  },
+  "replay": {
+    "title": "REPLAY",
+    "watchReplay": "Watch Replay",
+    "action": "{{current}} / {{total}}",
+    "play": "Play",
+    "pause": "Pause",
+    "speed": "Playback speed",
+    "finished": "COMPLETE",
+    "exit": "Exit"
   }
 }

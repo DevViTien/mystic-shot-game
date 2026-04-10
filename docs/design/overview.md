@@ -115,7 +115,8 @@ src/
 │   ├── TurnManager.ts       # Timer 60s, phase transitions
 │   ├── CollisionSystem.ts   # Trajectory trace + collision
 │   ├── Commands.ts          # MoveCommand, FireCommand (serializable)
-│   └── CommandQueue.ts      # Queue lệnh tuần tự
+│   ├── CommandQueue.ts      # Queue lệnh tuần tự
+│   └── ReplayRecorder.ts    # Ghi lại game actions cho replay (P2f)
 ├── skins/                   # Skin system (P2a)
 │   ├── types.ts, SkinRegistry.ts
 │   ├── presets/             # 5 built-in skins
@@ -130,7 +131,8 @@ src/
 ├── scenes/                  # Phaser scenes
 │   ├── GameScene.ts         # Main gameplay
 │   ├── MenuScene.ts         # Blank (React overlay)
-│   └── GameOverScene.ts     # Blank (React overlay)
+│   ├── GameOverScene.ts     # Blank (React overlay)
+│   └── ReplayScene.ts       # Replay playback (P2f)
 ├── entities/                # Phaser game objects
 │   ├── Player.ts, Projectile.ts, PowerUp.ts, Obstacle.ts
 ├── math/                    # Parse & validate biểu thức
@@ -141,6 +143,7 @@ src/
 │   ├── LobbyScreen.tsx, WaitingRoom.tsx
 │   ├── HudHeader.tsx, ControlFooter.tsx
 │   ├── FormulaInput.tsx, GameOverOverlay.tsx
+│   ├── ReplayOverlay.tsx    # Replay controls (P2f)
 │   ├── SkinPicker.tsx, MapPicker.tsx
 │   ├── PhaserGame.tsx, ThemeToggle.tsx, LanguageSwitcher.tsx
 └── utils/                   # Helpers
@@ -185,8 +188,8 @@ npm run format:check # Prettier check (CI)
 | Phase | Nội dung | Trạng thái |
 |-------|---------|------------|
 | **Phase 1** | Core game: gameplay, UI, math engine | ✅ Hoàn chỉnh |
-| **Phase 2** | Extensions: skins, online, maps, preview, keyboard | ✅ Hoàn chỉnh |
-| **Phase 3** | Planned: map editor, accounts, matchmaking, spectator, replay | ⬜ Chưa bắt đầu |
+| **Phase 2** | Extensions: skins, online, maps, preview, keyboard, replay | ✅ Hoàn chỉnh |
+| **Phase 3** | Planned: map editor, accounts, matchmaking, spectator, replay persistence | ⬜ Chưa bắt đầu |
 
 Chi tiết: xem [phase-1.md](phase-1.md) và [phase-2.md](phase-2.md)
 

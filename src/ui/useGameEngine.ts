@@ -7,7 +7,9 @@ import {
   FireCommand,
   TurnManager,
   TurnEvent,
+  ReplayRecorder,
   type GameStateSnapshot,
+  type ReplayData,
 } from '../core';
 import { Difficulty, MAP, PLAYER, PREVIEW } from '../config';
 import { MapGenerator } from '../utils/MapGenerator';
@@ -32,7 +34,8 @@ export type AppScreen =
   | 'lobby'
   | 'waiting'
   | 'game'
-  | 'gameOver';
+  | 'gameOver'
+  | 'replay';
 
 export function useGameEngine() {
   const gameState = useMemo(() => new GameState(), []);
@@ -46,6 +49,12 @@ export function useGameEngine() {
   const [winnerId, setWinnerId] = useState<1 | 2 | null>(null);
   const [animating, setAnimating] = useState(false);
   const pendingTurnAction = useRef<'end' | 'reset' | null>(null);
+
+  // Replay state
+  const replayRecorder = useMemo(() => new ReplayRecorder(gameState), [gameState]);
+  const [replayData, setReplayData] = useState<ReplayData | null>(null);
+  const [replayProgress, setReplayProgress] = useState({ current: 0, total: 0 });
+  const [replayFinished, setReplayFinished] = useState(false);
 
   // Online state
   const [roomManager] = useState(() => new RoomManager());
@@ -99,6 +108,8 @@ export function useGameEngine() {
   // GameOver handler — separate effect because it depends on online state
   useEffect(() => {
     const unsubGameOver = gameState.on(GameEvent.GameOver, ({ winnerId }) => {
+      replayRecorder.stop();
+      setReplayData(replayRecorder.getData());
       setScreen('gameOver');
       setWinnerId(winnerId);
       turnManager.stopTurn();
@@ -107,7 +118,7 @@ export function useGameEngine() {
       }
     });
     return () => { unsubGameOver(); };
-  }, [gameState, turnManager, onlineMode, isHost, roomManager]);
+  }, [gameState, turnManager, onlineMode, isHost, roomManager, replayRecorder]);
 
   // ── Local play handlers ──
 
@@ -247,12 +258,14 @@ export function useGameEngine() {
 
       setOnlineMode(false);
       adapterRef.current = new LocalInputAdapter(gameState, collisionSystem);
+      replayRecorder.reset();
+      replayRecorder.start();
       setScreen('game');
       setWinnerId(null);
       setTimer(60);
       turnManager.startTurn();
     },
-    [gameState, turnManager, collisionSystem],
+    [gameState, turnManager, collisionSystem, replayRecorder],
   );
 
   // ── Online handlers ──
@@ -387,11 +400,13 @@ export function useGameEngine() {
       });
     }
 
+    replayRecorder.reset();
+    replayRecorder.start();
     setScreen('game');
     setWinnerId(null);
     setTimer(60);
     turnManager.startTurn();
-  }, [gameState, turnManager, collisionSystem, roomManager, presenceManager, roomMeta]);
+  }, [gameState, turnManager, collisionSystem, roomManager, presenceManager, roomMeta, replayRecorder]);
 
   // Guest: watch for status='playing' → load state and start local game
   useEffect(() => {
@@ -445,6 +460,8 @@ export function useGameEngine() {
         });
       }
 
+      replayRecorder.reset();
+      replayRecorder.start();
       setScreen('game');
       setWinnerId(null);
       setTimer(60);
@@ -452,7 +469,7 @@ export function useGameEngine() {
     };
 
     initGuest();
-  }, [onlineMode, isHost, roomMeta, gameState, turnManager, collisionSystem, roomManager, presenceManager]);
+  }, [onlineMode, isHost, roomMeta, gameState, turnManager, collisionSystem, roomManager, presenceManager, replayRecorder]);
 
   // ── Navigation ──
 
@@ -496,6 +513,59 @@ export function useGameEngine() {
     }
   }, [onlineMode, isHost, gameState, turnManager, handleBackToMenu]);
 
+  // ── Replay handlers ──
+
+  const handleStartReplay = useCallback(() => {
+    if (!replayData) return;
+
+    const game = phaserRef.current?.getGame();
+    if (!game) return;
+
+    game.registry.set('replayData', replayData);
+    game.registry.set('replaySpeed', 1);
+    game.registry.set('replayPaused', false);
+    game.registry.set('replayFinished', false);
+    game.registry.set('replayProgress', { current: 0, total: replayData.entries.length });
+
+    setReplayProgress({ current: 0, total: replayData.entries.length });
+    setReplayFinished(false);
+
+    // Listen for progress updates from ReplayScene
+    const onProgress = (_: unknown, value: { current: number; total: number }) => {
+      setReplayProgress(value);
+    };
+    const onFinished = (_: unknown, value: boolean) => {
+      if (value) setReplayFinished(true);
+    };
+    game.registry.events.on('changedata-replayProgress', onProgress);
+    game.registry.events.on('changedata-replayFinished', onFinished);
+
+    // Start ReplayScene
+    const active = game.scene.getScenes(true)[0];
+    active?.scene.start('ReplayScene');
+
+    setScreen('replay');
+  }, [replayData]);
+
+  const handleReplaySetSpeed = useCallback((speed: number) => {
+    const game = phaserRef.current?.getGame();
+    game?.registry.set('replaySpeed', speed);
+  }, []);
+
+  const handleReplaySetPaused = useCallback((paused: boolean) => {
+    const game = phaserRef.current?.getGame();
+    game?.registry.set('replayPaused', paused);
+  }, []);
+
+  const handleExitReplay = useCallback(() => {
+    const game = phaserRef.current?.getGame();
+    if (game) {
+      game.registry.events.off('changedata-replayProgress');
+      game.registry.events.off('changedata-replayFinished');
+    }
+    setScreen('gameOver');
+  }, []);
+
   return {
     gameState,
     phaserRef,
@@ -522,6 +592,14 @@ export function useGameEngine() {
     handleOnlineStart,
     handleCancelRoom,
     handleLeaveGame,
+    // Replay
+    replayData,
+    replayProgress,
+    replayFinished,
+    handleStartReplay,
+    handleReplaySetSpeed,
+    handleReplaySetPaused,
+    handleExitReplay,
     setScreen,
   };
 }

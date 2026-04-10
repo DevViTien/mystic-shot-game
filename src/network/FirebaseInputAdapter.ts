@@ -56,12 +56,13 @@ export class FirebaseInputAdapter implements InputAdapter {
     const cmd = new MoveCommand(this.gameState, snap.currentPlayerId, expression, direction);
     const serialized = cmd.serialize();
 
+    // Pre-register key BEFORE execute to prevent onChildAdded double-execute
+    const pushKey = this.roomManager.allocateCommandKey();
+    this.processedCommandIds.add(pushKey);
+
     cmd.execute();
 
-    // Push to Firebase and track the key to avoid double-execute
-    this.roomManager.pushCommand(serialized).then((pushKey) => {
-      if (pushKey) this.processedCommandIds.add(pushKey);
-    });
+    this.roomManager.writeCommand(pushKey, serialized);
 
     // Host writes state backup
     if (this.isHost()) {
@@ -80,11 +81,13 @@ export class FirebaseInputAdapter implements InputAdapter {
     );
     const serialized = cmd.serialize();
 
+    // Pre-register key BEFORE execute to prevent onChildAdded double-execute
+    const pushKey = this.roomManager.allocateCommandKey();
+    this.processedCommandIds.add(pushKey);
+
     cmd.execute();
 
-    this.roomManager.pushCommand(serialized).then((pushKey) => {
-      if (pushKey) this.processedCommandIds.add(pushKey);
-    });
+    this.roomManager.writeCommand(pushKey, serialized);
 
     if (this.isHost()) {
       this.roomManager.writeState(JSON.stringify(this.gameState.getSnapshot()));

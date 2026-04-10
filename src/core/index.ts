@@ -18,3 +18,5 @@ export { TurnManager, TurnEvent } from './TurnManager';
 export type { TurnEventMap } from './TurnManager';
 export { CollisionSystem } from './CollisionSystem';
 export type { CollisionResult } from './CollisionSystem';
+export { ReplayRecorder } from './ReplayRecorder';
+export type { ReplayData, ReplayEntry } from './ReplayRecorder';

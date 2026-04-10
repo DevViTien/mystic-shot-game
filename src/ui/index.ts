@@ -11,4 +11,5 @@ export { MapPicker } from './MapPicker';
 export { MainMenu } from './MainMenu';
 export { LobbyScreen } from './LobbyScreen';
 export { WaitingRoom } from './WaitingRoom';
+export { ReplayOverlay } from './ReplayOverlay';
 export { useGameEngine } from './useGameEngine';

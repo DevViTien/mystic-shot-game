@@ -26,6 +26,9 @@ export { ChevronRight as IconChevronRight } from 'lucide-react';
 export { ChevronUp as IconChevronUp } from 'lucide-react';
 export { ChevronDown as IconChevronDown } from 'lucide-react';
 export { Play as IconPlay } from 'lucide-react';
+export { Pause as IconPause } from 'lucide-react';
+export { FastForward as IconFastForward } from 'lucide-react';
+export { X as IconX } from 'lucide-react';
 
 // ---------- Actions ----------
 export { Crosshair as IconFire } from 'lucide-react';

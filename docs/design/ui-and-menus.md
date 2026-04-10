@@ -4,13 +4,13 @@
 
 ```
 MainMenu
-  ├── "Local Play"  → MenuScreen → Game → GameOver
+  ├── "Local Play"  → MenuScreen → Game → GameOver ⇄ Replay
   └── "Online Play" → LobbyScreen
-                        ├── Create Room → WaitingRoom → Game → GameOver
-                        └── Join Room  → WaitingRoom → Game → GameOver
+                        ├── Create Room → WaitingRoom → Game → GameOver ⇄ Replay
+                        └── Join Room  → WaitingRoom → Game → GameOver ⇄ Replay
 ```
 
-**6 AppScreen states**: `mainMenu` → `localMenu` / `lobby` → `waiting` → `game` → `gameOver`
+**7 AppScreen states**: `mainMenu` → `localMenu` / `lobby` → `waiting` → `game` → `gameOver` ⇄ `replay`
 
 Quản lý trong `useGameEngine` hook, render trong `App.tsx`.
 
@@ -274,13 +274,14 @@ handleKeyDown:
 │                                │
 │     🏆 [PlayerName] Wins!     │
 │                                │
-│       [ BACK TO MENU ]        │
+│  [ ▶ Watch Replay ]  [ BACK ] │
 │                                │
 └────────────────────────────────┘
 ```
 
 - React overlay hiển thị trên canvas
 - Nhận `winnerId` → resolve tên từ snapshot
+- **Watch Replay**: Chỉ hiển thị khi `replayData` có data → chuyển sang screen `replay`
 - Back to Menu → reset state, cleanup adapters, chuyển về MainMenu
 
 ---
@@ -324,7 +325,39 @@ Carousel slider chọn map trong MenuScreen/LobbyScreen.
 ## 13. PhaserGame
 
 Mount Phaser canvas vào React DOM:
-- Config: 3 scenes (MenuScene, GameScene, GameOverScene)
+- Config: 4 scenes (MenuScene, GameScene, GameOverScene, ReplayScene)
 - `GameState` truyền qua `game.registry`
 - Expose `PhaserGameHandle` via `forwardRef` + `useImperativeHandle`
 - `getGame()` method cho useGameEngine access Phaser instance
+- Canvas hiển thị khi `screen === 'game'` hoặc `screen === 'replay'`
+
+---
+
+## 14. ReplayOverlay
+
+React controls bar hiển thị khi `screen === 'replay'`, nằm bottom của viewport.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│ REPLAY   3/12            [⏸] [▶▶ 2×]  ████████░░   COMPLETE  [✕ Exit] │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Elements
+
+| Phần tử | Vị trí | Hành vi |
+|---------|--------|--------|
+| Label "REPLAY" | Trái | Accent color, uppercase, font-bold |
+| Progress text | Trái | "3 / 12" (current / total entries) |
+| Play/Pause | Giữa | Toggle `IconPlay` / `IconPause` |
+| Speed | Giữa | Cycle 1× → 2× → 4× → 1×, `IconFastForward` + giá trị |
+| Progress bar | Giữa | Width% = current/total, bg-accent, animated |
+| Finished badge | Giữa | "COMPLETE" khi replay xong, text-warning |
+| Exit | Phải | `IconX` + "Exit", quay về gameOver screen |
+
+### Behavior
+
+- **Auto-pause**: Khi replay phát xong (`replayFinished` = true), tự động pause
+- **Exit**: Gỡ registry event listeners, chuyển `screen` về `gameOver`
+- **Speed cycle**: Click nút speed → 1× → 2× → 4× → 1× (loop)
+- **Giao tiếp**: Set `replaySpeed` / `replayPaused` trên `game.registry` → ReplayScene đọc trong `update()`

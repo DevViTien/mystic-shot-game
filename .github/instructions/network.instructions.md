@@ -55,7 +55,8 @@ createRoom() → 6-char code, hostId, status='waiting'
 - Room code: 6-char alphanumeric (loại trừ I/O/0/1 tránh nhầm lẫn)
 - `onMetaChange()` — subscribe metadata changes
 - `onCommand()` — subscribe commands (skip existing children on subscribe)
-- `pushCommand()` → returns push key cho dedup
+- `allocateCommandKey()` → sync, generate push key (no network)
+- `writeCommand(key, cmd)` → async, write command to allocated key
 
 ## PresenceManager (`PresenceManager.ts`)
 

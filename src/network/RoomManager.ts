@@ -188,14 +188,26 @@ export class RoomManager {
   }
 
   /**
-   * Push a command to the room's command log.
+   * Allocate a push key synchronously (no network call).
+   * Use with writeCommand() to avoid race conditions with onChildAdded.
    */
-  async pushCommand(command: object): Promise<string | null> {
+  allocateCommandKey(): string {
     if (!this.roomId) throw new Error('No room');
     const db = getDb();
     const cmdRef = push(ref(db, `rooms/${this.roomId}/commands`));
-    await set(cmdRef, { ...command, timestamp: serverTimestamp() });
-    return cmdRef.key;
+    return cmdRef.key!;
+  }
+
+  /**
+   * Write a command to an already-allocated key.
+   */
+  async writeCommand(key: string, command: object): Promise<void> {
+    if (!this.roomId) throw new Error('No room');
+    const db = getDb();
+    await set(ref(db, `rooms/${this.roomId}/commands/${key}`), {
+      ...command,
+      timestamp: serverTimestamp(),
+    });
   }
 
   /**

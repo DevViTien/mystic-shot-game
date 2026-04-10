@@ -1,14 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import { IconTrophy, IconBack } from '../common/icons';
+import { IconTrophy, IconBack, IconPlay } from '../common/icons';
 import type { GameStateSnapshot } from '../core';
 
 interface GameOverOverlayProps {
   snapshot: GameStateSnapshot;
   winnerId: 1 | 2 | null;
   onBackToMenu: () => void;
+  onWatchReplay?: () => void;
 }
 
-export function GameOverOverlay({ snapshot, winnerId, onBackToMenu }: GameOverOverlayProps) {
+export function GameOverOverlay({ snapshot, winnerId, onBackToMenu, onWatchReplay }: GameOverOverlayProps) {
   const { t } = useTranslation();
   const winner =
     winnerId !== null ? snapshot.players[winnerId - 1] : snapshot.players.find((p) => p.hp > 0);
@@ -20,12 +21,22 @@ export function GameOverOverlay({ snapshot, winnerId, onBackToMenu }: GameOverOv
         <h2 className="text-[32px] text-warning font-mono">
           {t('game.wins', { name: winner?.name ?? 'Unknown' })}
         </h2>
-        <button
-          className="px-12 py-3 text-lg font-bold tracking-wider rounded-md bg-accent text-black cursor-pointer border-none hover:opacity-85 transition-opacity duration-150 flex items-center gap-2"
-          onClick={onBackToMenu}
-        >
-          <IconBack size={18} /> {t('button.backToMenu')}
-        </button>
+        <div className="flex items-center gap-3">
+          {onWatchReplay && (
+            <button
+              className="px-8 py-3 text-lg font-bold tracking-wider rounded-md bg-accent/20 text-accent cursor-pointer border-none hover:bg-accent/30 transition-colors flex items-center gap-2"
+              onClick={onWatchReplay}
+            >
+              <IconPlay size={18} /> {t('replay.watchReplay')}
+            </button>
+          )}
+          <button
+            className="px-12 py-3 text-lg font-bold tracking-wider rounded-md bg-accent text-black cursor-pointer border-none hover:opacity-85 transition-opacity duration-150 flex items-center gap-2"
+            onClick={onBackToMenu}
+          >
+            <IconBack size={18} /> {t('button.backToMenu')}
+          </button>
+        </div>
       </div>
     </div>
   );

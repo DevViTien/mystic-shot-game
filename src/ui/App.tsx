@@ -8,6 +8,7 @@ import { useGameEngine } from './useGameEngine';
 import { HudHeader } from './HudHeader';
 import { ControlFooter } from './ControlFooter';
 import { GameOverOverlay } from './GameOverOverlay';
+import { ReplayOverlay } from './ReplayOverlay';
 
 export function App() {
   const { theme, toggle: toggleTheme } = useTheme();
@@ -35,6 +36,13 @@ export function App() {
     handleOnlineStart,
     handleCancelRoom,
     handleLeaveGame,
+    replayData,
+    replayProgress,
+    replayFinished,
+    handleStartReplay,
+    handleReplaySetSpeed,
+    handleReplaySetPaused,
+    handleExitReplay,
     setScreen,
   } = useGameEngine();
 
@@ -94,7 +102,7 @@ export function App() {
       )}
 
       <main
-        style={{ display: screen === 'game' ? 'flex' : 'none' }}
+        style={{ display: screen === 'game' || screen === 'replay' ? 'flex' : 'none' }}
         className="flex-1 flex items-center justify-center overflow-x-auto overflow-y-hidden min-h-0 py-2"
       >
         <PhaserGame ref={phaserRef} gameState={gameState} />
@@ -111,7 +119,23 @@ export function App() {
       )}
 
       {screen === 'gameOver' && (
-        <GameOverOverlay snapshot={snapshot} winnerId={winnerId} onBackToMenu={handleBackToMenu} />
+        <GameOverOverlay
+          snapshot={snapshot}
+          winnerId={winnerId}
+          onBackToMenu={handleBackToMenu}
+          onWatchReplay={replayData ? handleStartReplay : undefined}
+        />
+      )}
+
+      {screen === 'replay' && (
+        <ReplayOverlay
+          totalEntries={replayProgress.total}
+          currentEntry={replayProgress.current}
+          finished={replayFinished}
+          onSetSpeed={handleReplaySetSpeed}
+          onSetPaused={handleReplaySetPaused}
+          onExit={handleExitReplay}
+        />
       )}
     </div>
   );

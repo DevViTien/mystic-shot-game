@@ -31,5 +31,8 @@
     "dist": true,
     "node_modules": true,
     "*.lock": true
+  },
+  "chat.tools.terminal.autoApprove": {
+    "npx vitest": true
   }
 }

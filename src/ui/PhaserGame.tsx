@@ -4,6 +4,7 @@ import { PHASER_CONFIG } from '../config';
 import { GameScene } from '../scenes/GameScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { GameOverScene } from '../scenes/GameOverScene';
+import { ReplayScene } from '../scenes/ReplayScene';
 import type { GameState } from '../core';
 
 interface PhaserGameProps {
@@ -38,7 +39,7 @@ export const PhaserGame = forwardRef<PhaserGameHandle, PhaserGameProps>(function
       height: PHASER_CONFIG.CANVAS_HEIGHT,
       parent: containerRef.current,
       backgroundColor: PHASER_CONFIG.BACKGROUND_COLOR,
-      scene: [MenuScene, GameScene, GameOverScene],
+      scene: [MenuScene, GameScene, GameOverScene, ReplayScene],
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,

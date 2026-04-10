@@ -188,5 +188,15 @@
     "connecting": "Đang kết nối...",
     "cancel": "Hủy",
     "startGame": "BẮT ĐẦU"
+  },
+  "replay": {
+    "title": "XEM LẠI",
+    "watchReplay": "Xem lại trận đấu",
+    "action": "{{current}} / {{total}}",
+    "play": "Phát",
+    "pause": "Tạm dừng",
+    "speed": "Tốc độ phát",
+    "finished": "HOÀN TẤT",
+    "exit": "Thoát"
   }
 }
