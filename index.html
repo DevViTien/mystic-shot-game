@@ -1,17 +1,155 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png" />
-    <link rel="manifest" href="/assets/site.webmanifest" />
-    <title>Mystic Shot</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>Fake Ezform Signature</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 24px; }
+    canvas {
+      border: 1px solid #000;
+      background: #fff;
+      touch-action: none;
+      display: block;
+    }
+    button { margin: 12px 8px 20px 0; padding: 8px 14px; }
+    .preview {
+      width: 500px;
+      height: 180px;
+      border: 1px solid #aaa;
+      background: #f8f8f8;
+    }
+  </style>
+</head>
+<body>
+  <h3>Fake Ezform Signature</h3>
+
+  <canvas id="signatureCanvas" width="500" height="180"></canvas>
+
+  <button id="submitSignature">Submit</button>
+  <button id="clearSignature">Clear</button>
+
+  <h4>Submitted preview from state</h4>
+  <canvas id="signaturePreview" class="preview" width="500" height="180"></canvas>
+
+  <script>
+    (() => {
+      const canvas = document.querySelector('#signatureCanvas');
+      const preview = document.querySelector('#signaturePreview');
+      const ctx = canvas.getContext('2d');
+      const previewCtx = preview.getContext('2d');
+
+      const signatureState = {
+        strokes: [],
+        currentStroke: null,
+        submittedStrokes: [],
+      };
+
+      const setupContext = (context) => {
+        context.lineWidth = 3;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        context.strokeStyle = '#111';
+      };
+
+      setupContext(ctx);
+      setupContext(previewCtx);
+
+      const getPoint = (event) => {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: (event.clientX - rect.left) * (canvas.width / rect.width),
+          y: (event.clientY - rect.top) * (canvas.height / rect.height),
+        };
+      };
+
+      const drawStrokeOnContext = (context, stroke) => {
+        if (!stroke.length) return;
+
+        context.beginPath();
+        context.moveTo(stroke[0].x, stroke[0].y);
+
+        for (const point of stroke.slice(1)) {
+          context.lineTo(point.x, point.y);
+        }
+
+        context.stroke();
+        context.closePath();
+      };
+
+      const renderPreviewFromState = () => {
+        previewCtx.clearRect(0, 0, preview.width, preview.height);
+        setupContext(previewCtx);
+
+        for (const stroke of signatureState.submittedStrokes) {
+          drawStrokeOnContext(previewCtx, stroke);
+        }
+      };
+
+      const startStroke = (event) => {
+        const point = getPoint(event);
+
+        signatureState.currentStroke = [point];
+        signatureState.strokes.push(signatureState.currentStroke);
+
+        ctx.beginPath();
+        ctx.moveTo(point.x, point.y);
+
+        canvas.setPointerCapture?.(event.pointerId);
+        event.preventDefault();
+      };
+
+      const moveStroke = (event) => {
+        if (!signatureState.currentStroke) return;
+
+        const point = getPoint(event);
+        signatureState.currentStroke.push(point);
+
+        ctx.lineTo(point.x, point.y);
+        ctx.stroke();
+
+        event.preventDefault();
+      };
+
+      const endStroke = (event) => {
+        if (!signatureState.currentStroke) return;
+
+        signatureState.currentStroke = null;
+        ctx.closePath();
+
+        event.preventDefault();
+      };
+
+      const submitSignature = () => {
+        signatureState.submittedStrokes = signatureState.strokes.map((stroke) =>
+          stroke.map((point) => ({ ...point }))
+        );
+
+        renderPreviewFromState();
+
+        console.log('[fake-ezform] submitted from state', signatureState.submittedStrokes);
+      };
+
+      const clearSignature = () => {
+        signatureState.strokes = [];
+        signatureState.currentStroke = null;
+        signatureState.submittedStrokes = [];
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        previewCtx.clearRect(0, 0, preview.width, preview.height);
+      };
+
+      canvas.addEventListener('pointerdown', startStroke);
+      canvas.addEventListener('pointermove', moveStroke);
+      canvas.addEventListener('pointerup', endStroke);
+      canvas.addEventListener('pointercancel', endStroke);
+
+      document.querySelector('#submitSignature').addEventListener('click', submitSignature);
+      document.querySelector('#clearSignature').addEventListener('click', clearSignature);
+
+      window.__fakeEzformSignatureState = signatureState;
+
+      console.log('[fake-ezform] ready');
+    })();
+  </script>
+</body>
 </html>
